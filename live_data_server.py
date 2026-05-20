@@ -1,4 +1,5 @@
 import json
+import os
 import urllib.request
 import urllib.error
 from http.server import SimpleHTTPRequestHandler, HTTPServer
@@ -7,8 +8,8 @@ from datetime import datetime
 
 from bs4 import BeautifulSoup
 
-HOST = '127.0.0.1'
-PORT = 8000
+HOST = '0.0.0.0'
+PORT = int(os.environ.get('PORT', 8000))
 
 TARGET_URL = 'https://www.fifa.com/fifaplus/en/tournaments/mens/worldcup/2026/fixtures-results/'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
