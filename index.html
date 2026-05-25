@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="api-endpoint" content="/api/live.json">
+<meta name="api-endpoint" content="https://statcdm2026.netlify.app/api/live.json">
 <title>FIFA World Cup 2026 — Stats Dashboard</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap');
@@ -1065,7 +1065,7 @@
 </footer>
 
 <script>
-const API_ENDPOINT = document.querySelector('meta[name="api-endpoint"]')?.content || '/api/live.json';
+const API_ENDPOINT = document.querySelector('meta[name="api-endpoint"]')?.content || 'https://cdm2026.onrender.com/api/live.json';
 const DEFAULT_LIVE_DATA = {
   live: false,
   last_updated: new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
