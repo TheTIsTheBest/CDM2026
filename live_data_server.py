@@ -76,20 +76,3 @@ def run_server():
 
 if __name__ == '__main__':
     run_server()
-        return super().do_GET()
-
-
-def run_server():
-    server_address = (HOST, PORT)
-    httpd = HTTPServer(server_address, LiveRequestHandler)
-    print(f'Serving on http://{HOST}:{PORT}/')
-    print('Démarrez la page avec ce serveur et actualisez pour obtenir les données scrappées.')
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print('\nArrêt du serveur')
-        httpd.server_close()
-
-
-if __name__ == '__main__':
-    run_server()
