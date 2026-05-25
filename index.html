@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="api-endpoint" content="/api/live.json">
 <title>FIFA World Cup 2026 — Stats Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap');
 
@@ -912,8 +912,6 @@
     <li><a href="#groupes">Groupes</a></li>
     <li><a href="#buteurs">Buteurs</a></li>
     <li><a href="#matchs">Matchs</a></li>
-    <li><a href="#nations">Nations</a></li>
-    <li><a href="#heatmap">Heatmap</a></li>
   </ul>
 </nav>
 
@@ -939,19 +937,19 @@
 
     <div class="hero-stats-row">
       <div class="hero-stat">
-        <span class="hero-stat-val" data-target="104">0</span>
+        <span class="hero-stat-val" data-stat="matches_played">0</span>
         <span class="hero-stat-lab">Matchs joués</span>
       </div>
       <div class="hero-stat">
-        <span class="hero-stat-val" data-target="312">0</span>
+        <span class="hero-stat-val" data-stat="goals">0</span>
         <span class="hero-stat-lab">Buts marqués</span>
       </div>
       <div class="hero-stat">
-        <span class="hero-stat-val" data-target="48">0</span>
+        <span class="hero-stat-val" data-stat="teams">0</span>
         <span class="hero-stat-lab">Nations</span>
       </div>
       <div class="hero-stat">
-        <span class="hero-stat-val" data-target="16">0</span>
+        <span class="hero-stat-val" data-stat="host_cities">0</span>
         <span class="hero-stat-lab">Villes hôtes</span>
       </div>
     </div>
@@ -970,60 +968,33 @@
   <section id="apercu">
     <div class="section-header">
       <span class="section-number">01 —</span>
-      <h2 class="section-title">Vue d'ensemble <span>globale</span></h2>
+      <h2 class="section-title">Vue d'ensemble <span>du tournoi</span></h2>
     </div>
 
     <div class="kpi-grid glow">
       <div class="kpi-card">
-        <div class="kpi-label">Buts / match (moy.)</div>
-        <div class="kpi-val">3<span class="kpi-unit">.00</span></div>
-        <div class="kpi-sub">↑ +0.22 vs 2022</div>
+        <div class="kpi-label">Matchs joués</div>
+        <div class="kpi-val" data-stat="matches_played">0</div>
+        <div class="kpi-sub">CDM 2026</div>
+        <div class="kpi-accent">🏟️</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Buts marqués</div>
+        <div class="kpi-val" data-stat="goals">0</div>
+        <div class="kpi-sub">Total du tournoi</div>
         <div class="kpi-accent">⚽</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Taux de possession (avg.)</div>
-        <div class="kpi-val">51<span class="kpi-unit">%</span></div>
-        <div class="kpi-sub">Répartition quasi-équilibrée</div>
-        <div class="kpi-accent">🔄</div>
+        <div class="kpi-label">Nations</div>
+        <div class="kpi-val" data-stat="teams">0</div>
+        <div class="kpi-sub">Format 48 équipes</div>
+        <div class="kpi-accent">🌍</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Cartons rouges</div>
-        <div class="kpi-val">9</div>
-        <div class="kpi-sub">↓ Moins violente qu'en 2018</div>
-        <div class="kpi-accent">🟥</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Tirs aux pénaltys</div>
-        <div class="kpi-val">4<span class="kpi-unit"> séances</span></div>
-        <div class="kpi-sub">Argentina, Maroc qualifiés</div>
-        <div class="kpi-accent">🎯</div>
-      </div>
-    </div>
-
-    <!-- Charts row 1 -->
-    <div class="chart-grid">
-      <div class="chart-panel">
-        <div class="chart-title">Évolution des buts par tour</div>
-        <div class="chart-sub">Nombre total de buts marqués à chaque phase</div>
-        <div class="chart-wrap">
-          <canvas id="chartGoalsRound"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-panel">
-        <div class="chart-title">Répartition des résultats</div>
-        <div class="chart-sub">Victoire normale, AP, TAB</div>
-        <div class="chart-wrap">
-          <canvas id="chartResults"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-panel wide">
-        <div class="chart-title">Buts marqués par tranche horaire</div>
-        <div class="chart-sub">Distribution sur 90 minutes de jeu</div>
-        <div class="chart-wrap">
-          <canvas id="chartMinutes"></canvas>
-        </div>
+        <div class="kpi-label">Villes hôtes</div>
+        <div class="kpi-val" data-stat="host_cities">0</div>
+        <div class="kpi-sub">USA / Canada / Mexique</div>
+        <div class="kpi-accent">🗽</div>
       </div>
     </div>
   </section>
@@ -1067,14 +1038,6 @@
           <tbody id="scorersBody"></tbody>
         </table>
       </div>
-
-      <div class="chart-panel">
-        <div class="chart-title">Profil des buteurs — Radar</div>
-        <div class="chart-sub">Stats comparées top 5 buteurs</div>
-        <div class="chart-wrap tall">
-          <canvas id="chartRadar"></canvas>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -1082,106 +1045,18 @@
   <section id="matchs">
     <div class="section-header">
       <span class="section-number">04 —</span>
-      <h2 class="section-title">Résultats <span>notables</span></h2>
+      <h2 class="section-title">Tous les <span>matchs</span></h2>
     </div>
 
     <div class="chart-panel" style="margin-bottom:24px">
-      <div class="chart-title">Statut des matchs</div>
+      <div class="chart-title">Statut des matchs en direct</div>
       <div class="chart-sub" id="liveSummary">Chargement des données en direct...</div>
     </div>
 
-    <div class="chart-grid">
-      <div class="timeline" id="matchTimeline"></div>
-
-      <div>
-        <div class="chart-panel" style="margin-bottom:24px">
-          <div class="chart-title">Performance défensive</div>
-          <div class="chart-sub">Buts encaissés par équipe (moins = mieux)</div>
-          <div class="chart-wrap short">
-            <canvas id="chartDefense"></canvas>
-          </div>
-        </div>
-        <div class="chart-panel">
-          <div class="chart-title">Xg vs Buts réels</div>
-          <div class="chart-sub">Sur-performance / sous-performance offensive</div>
-          <div class="chart-wrap short">
-            <canvas id="chartXG"></canvas>
-          </div>
-        </div>
-        <div class="chart-panel" style="margin-top:24px">
-          <div class="chart-title">Cotes bookmakers</div>
-          <div class="chart-sub">Données extraites en direct via scraping Python</div>
-          <table class="odds-table" id="oddsTable">
-            <thead>
-              <tr>
-                <th>Bookmaker</th>
-                <th>Choix</th>
-                <th>Prob.</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    <div class="timeline" id="matchTimeline"></div>
   </section>
 
-  <!-- ─── NATIONS ─── -->
-  <section id="nations">
-    <div class="section-header">
-      <span class="section-number">05 —</span>
-      <h2 class="section-title">Analyse <span>par nation</span></h2>
-    </div>
 
-    <div class="chart-grid-3">
-      <div class="chart-panel">
-        <div class="chart-title">Possession moyenne %</div>
-        <div class="chart-sub">Top 8 nations — Phase de groupes</div>
-        <div class="progress-list" id="possessionList"></div>
-      </div>
-
-      <div class="chart-panel">
-        <div class="chart-title">Distance parcourue (km/match)</div>
-        <div class="chart-sub">Intensité physique moyenne</div>
-        <div class="chart-wrap">
-          <canvas id="chartDistance"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-panel">
-        <div class="chart-title">Passes complètes / match</div>
-        <div class="chart-sub">Volume de jeu construit</div>
-        <div class="progress-list" id="passesList"></div>
-      </div>
-
-      <div class="chart-panel wide">
-        <div class="chart-title">Cotes de Favoris — Évolution</div>
-        <div class="chart-sub">Probabilité de victoire estimée par les bookmakers (en %)</div>
-        <div class="chart-wrap">
-          <canvas id="chartOdds"></canvas>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── HEATMAP ─── -->
-  <section id="heatmap">
-    <div class="section-header">
-      <span class="section-number">06 —</span>
-      <h2 class="section-title">Heatmap <span>des buts</span></h2>
-    </div>
-
-    <div class="chart-panel">
-      <div class="chart-title">Distribution des buts par minute (Groupes — toutes équipes)</div>
-      <div class="chart-sub">Survolez une cellule pour voir le détail • Plus c'est lumineux = plus de buts</div>
-      <div class="heatmap-grid" id="heatmapGrid"></div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:16px">
-        <span style="font-size:0.72rem;color:var(--muted)">0 but</span>
-        <div style="flex:1;height:4px;background:linear-gradient(90deg,var(--bg3),var(--gold));border-radius:2px"></div>
-        <span style="font-size:0.72rem;color:var(--muted)">Nombreux buts</span>
-      </div>
-    </div>
-  </section>
 
 </main>
 
@@ -1190,113 +1065,7 @@
 </footer>
 
 <script>
-// ══════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════
-
-const GROUPS_DATA = [
-  { name: 'Groupe A', teams: [
-    { name: '🇧🇷 Brésil',    p:3, w:3, d:0, l:0, gf:8, ga:2, pts:9 },
-    { name: '🇩🇪 Allemagne', p:3, w:2, d:0, l:1, gf:5, ga:3, pts:6 },
-    { name: '🇲🇦 Maroc',    p:3, w:1, d:0, l:2, gf:3, ga:5, pts:3 },
-    { name: '🇭🇷 Croatie',  p:3, w:0, d:0, l:3, gf:1, ga:7, pts:0 },
-  ]},
-  { name: 'Groupe B', teams: [
-    { name: '🇫🇷 France',    p:3, w:2, d:1, l:0, gf:7, ga:2, pts:7 },
-    { name: '🇦🇷 Argentine', p:3, w:2, d:0, l:1, gf:6, ga:3, pts:6 },
-    { name: '🇳🇱 P-Bas',    p:3, w:1, d:1, l:1, gf:4, ga:5, pts:4 },
-    { name: '🇨🇦 Canada',   p:3, w:0, d:0, l:3, gf:1, ga:8, pts:0 },
-  ]},
-  { name: 'Groupe C', teams: [
-    { name: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', p:3, w:3, d:0, l:0, gf:9, ga:1, pts:9 },
-    { name: '🇵🇹 Portugal',  p:3, w:2, d:0, l:1, gf:7, ga:4, pts:6 },
-    { name: '🇺🇸 USA',      p:3, w:1, d:0, l:2, gf:3, ga:6, pts:3 },
-    { name: '🇮🇷 Iran',     p:3, w:0, d:0, l:3, gf:2, ga:10, pts:0 },
-  ]},
-  { name: 'Groupe D', teams: [
-    { name: '🇪🇸 Espagne',  p:3, w:2, d:1, l:0, gf:8, ga:3, pts:7 },
-    { name: '🇯🇵 Japon',    p:3, w:1, d:1, l:1, gf:4, ga:5, pts:4 },
-    { name: '🇲🇽 Mexique',  p:3, w:1, d:1, l:1, gf:3, ga:4, pts:4 },
-    { name: '🇸🇦 Arabie S', p:3, w:0, d:1, l:2, gf:2, ga:5, pts:1 },
-  ]},
-  { name: 'Groupe E', teams: [
-    { name: '🇧🇪 Belgique', p:3, w:2, d:0, l:1, gf:6, ga:4, pts:6 },
-    { name: '🇸🇳 Sénégal',  p:3, w:2, d:0, l:1, gf:5, ga:3, pts:6 },
-    { name: '🇨🇭 Suisse',   p:3, w:1, d:0, l:2, gf:4, ga:5, pts:3 },
-    { name: '🇨🇲 Cameroun', p:3, w:1, d:0, l:2, gf:3, ga:6, pts:3 },
-  ]},
-  { name: 'Groupe F', teams: [
-    { name: '🇺🇾 Uruguay',  p:3, w:2, d:1, l:0, gf:5, ga:1, pts:7 },
-    { name: '🇩🇰 Danemark', p:3, w:1, d:1, l:1, gf:4, ga:4, pts:4 },
-    { name: '🇬🇭 Ghana',    p:3, w:1, d:0, l:2, gf:3, ga:5, pts:3 },
-    { name: '🇦🇺 Australie', p:3, w:0, d:2, l:1, gf:2, ga:4, pts:2 },
-  ]},
-  { name: 'Groupe G', teams: [
-    { name: '🇮🇹 Italie',   p:3, w:3, d:0, l:0, gf:7, ga:2, pts:9 },
-    { name: '🇳🇬 Nigeria',  p:3, w:1, d:1, l:1, gf:4, ga:4, pts:4 },
-    { name: '🇵🇱 Pologne',  p:3, w:1, d:1, l:1, gf:3, ga:4, pts:4 },
-    { name: '🇬🇦 Gabon',   p:3, w:0, d:0, l:3, gf:1, ga:5, pts:0 },
-  ]},
-  { name: 'Groupe H', teams: [
-    { name: '🇰🇷 Corée S',  p:3, w:2, d:1, l:0, gf:6, ga:3, pts:7 },
-    { name: '🇨🇴 Colombie', p:3, w:1, d:1, l:1, gf:5, ga:5, pts:4 },
-    { name: '🇪🇨 Équateur', p:3, w:1, d:0, l:2, gf:4, ga:5, pts:3 },
-    { name: '🇹🇳 Tunisie',  p:3, w:0, d:2, l:1, gf:3, ga:5, pts:2 },
-  ]},
-];
-
-const SCORERS_DATA = {
-  goals: [
-    { name: 'K. Mbappé',     country: '🇫🇷 France',     val: 9, img: '⚡' },
-    { name: 'E. Haaland',    country: '🇳🇴 Norvège',    val: 7, img: '🔨' },
-    { name: 'V. Osimhen',    country: '🇳🇬 Nigeria',    val: 7, img: '🦁' },
-    { name: 'L. Martínez',   country: '🇦🇷 Argentine',  val: 6, img: '🐂' },
-    { name: 'H. Kane',       country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', val: 6, img: '🦁' },
-    { name: 'R. Lewandowski', country: '🇵🇱 Pologne',   val: 5, img: '⚡' },
-    { name: 'N. Williams',   country: '🇪🇸 Espagne',    val: 5, img: '🌟' },
-    { name: 'B. Diallo',     country: '🇸🇳 Sénégal',   val: 4, img: '🦁' },
-    { name: 'R. James',      country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', val: 4, img: '💨' },
-    { name: 'A. Santos',     country: '🇧🇷 Brésil',     val: 4, img: '🌈' },
-  ],
-  assists: [
-    { name: 'K. De Bruyne',  country: '🇧🇪 Belgique',   val: 7, img: '🎯' },
-    { name: 'K. Mbappé',     country: '🇫🇷 France',     val: 6, img: '⚡' },
-    { name: 'T. Kroos',      country: '🇩🇪 Allemagne',  val: 5, img: '🧠' },
-    { name: 'L. Modrić',     country: '🇭🇷 Croatie',   val: 5, img: '🎻' },
-    { name: 'A. Arnold',     country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', val: 5, img: '📐' },
-    { name: 'B. Fernandes',  country: '🇵🇹 Portugal',   val: 4, img: '🔥' },
-    { name: 'J. Bellingham', country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', val: 4, img: '👑' },
-    { name: 'D. Nkunku',     country: '🇫🇷 France',     val: 4, img: '⚡' },
-    { name: 'F. Valverde',   country: '🇺🇾 Uruguay',    val: 3, img: '💪' },
-    { name: 'H. Son',        country: '🇰🇷 Corée S',    val: 3, img: '🌟' },
-  ],
-  shots: [
-    { name: 'E. Haaland',    country: '🇳🇴 Norvège',    val: 42, img: '🔨' },
-    { name: 'K. Mbappé',     country: '🇫🇷 France',     val: 38, img: '⚡' },
-    { name: 'H. Kane',       country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', val: 35, img: '🦁' },
-    { name: 'V. Osimhen',    country: '🇳🇬 Nigeria',    val: 33, img: '🦁' },
-    { name: 'L. Martínez',   country: '🇦🇷 Argentine',  val: 30, img: '🐂' },
-    { name: 'R. Lewandowski', country: '🇵🇱 Pologne',   val: 28, img: '⚡' },
-    { name: 'B. Diallo',     country: '🇸🇳 Sénégal',   val: 25, img: '🦁' },
-    { name: 'A. Santos',     country: '🇧🇷 Brésil',     val: 24, img: '🌈' },
-    { name: 'N. Williams',   country: '🇪🇸 Espagne',    val: 22, img: '🌟' },
-    { name: 'D. Vlahović',   country: '🇷🇸 Serbie',     val: 21, img: '🔥' },
-  ],
-};
-
-const MATCHES_DATA = [
-  { date: '11 Juin', home: '🇺🇸 USA', away: '🇲🇽 Mexique', score: '2 - 0', stage: 'Groupes' },
-  { date: '12 Juin', home: '🇧🇷 Brésil', away: '🇩🇪 Allemagne', score: '3 - 1', stage: 'Groupes' },
-  { date: '14 Juin', home: '🇫🇷 France', away: '🇦🇷 Argentine', score: '2 - 1', stage: 'Groupes' },
-  { date: '22 Juin', home: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', away: '🇵🇹 Portugal', score: '3 - 2', stage: '1/8 finale' },
-  { date: '24 Juin', home: '🇪🇸 Espagne', away: '🇰🇷 Corée S', score: '2 - 1', stage: '1/8 finale' },
-  { date: '26 Juin', home: '🇧🇷 Brésil', away: '🇫🇷 France', score: '1 - 2', stage: '1/4 finale' },
-  { date: '28 Juin', home: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', away: '🇦🇷 Argentine', score: '1 - 1 (TAB 4-3)', stage: '1/2 finale' },
-  { date: '5 Juil', home: '🇫🇷 France', away: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', score: '2 - 0', stage: 'FINALE' },
-]; 
-
-const LIVE_API_URL = 'https://cdm2026.onrender.com/api/live.json';
-const LOCAL_FALLBACK_API_URL = './api/live.json';
+const API_ENDPOINT = document.querySelector('meta[name="api-endpoint"]')?.content || '/api/live.json';
 const DEFAULT_LIVE_DATA = {
   live: false,
   last_updated: new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
@@ -1306,161 +1075,25 @@ const DEFAULT_LIVE_DATA = {
     teams: 48,
     host_cities: 16,
   },
-  matches: [
-    { dateLabel: '11 Juin', datetime: '2026-06-11T18:00:00', home: '🇺🇸 USA', away: '🇲🇽 Mexique', score: null, stage: 'Groupes', status: 'upcoming' },
-    { dateLabel: '12 Juin', datetime: '2026-06-12T21:00:00', home: '🇧🇷 Brésil', away: '🇩🇪 Allemagne', score: null, stage: 'Groupes', status: 'upcoming' },
-    { dateLabel: '14 Juin', datetime: '2026-06-14T20:00:00', home: '🇫🇷 France', away: '🇦🇷 Argentine', score: null, stage: 'Groupes', status: 'upcoming' },
-  ],
-  odds: [
-    { site: 'Bet365', team: 'France 2.35', probability: '42%' },
-    { site: 'Winamax', team: 'Brésil 2.60', probability: '38%' },
-    { site: 'Unibet', team: 'Angleterre 2.10', probability: '45%' },
-  ],
+  groups: [],
+  matches: [],
+  scorers: { goals: [], assists: [], shots: [] },
 };
-let oddsChartRef = null;
 
-// ══════════════════════════════════════════════
-// CHART DEFAULTS
-// ══════════════════════════════════════════════
-
-Chart.defaults.color = '#6B7A99';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
-Chart.defaults.font.family = "'Barlow', sans-serif";
-
-const GOLD = '#F5C518';
-const RED  = '#E63946';
-const BLUE = '#3B82F6';
-const GREEN = '#22C55E';
-const PURPLE = '#A855F7';
-const ORANGE = '#F97316';
-
-function goldGrad(ctx, a = 0.8, b = 0.1) {
-  const g = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-  g.addColorStop(0, `rgba(245,197,24,${a})`);
-  g.addColorStop(1, `rgba(245,197,24,${b})`);
-  return g;
-}
-
-// ══════════════════════════════════════════════
-// BUILD: GROUPS
-// ══════════════════════════════════════════════
-
-function buildGroups() {
-  const container = document.getElementById('groupsContainer');
-  GROUPS_DATA.forEach(g => {
-    const card = document.createElement('div');
-    card.className = 'group-card';
-    card.innerHTML = `
-      <div class="group-head">${g.name}</div>
-      <div class="group-row" style="background:rgba(245,197,24,0.04)">
-        <span class="group-col-head">Équipe</span>
-        <span class="group-col-head">J</span>
-        <span class="group-col-head">G</span>
-        <span class="group-col-head">BP</span>
-        <span class="group-col-head pts">Pts</span>
-      </div>
-      ${g.teams.map((t, i) => `
-        <div class="group-row ${i < 2 ? 'qualified' : ''}">
-          <span>${t.name}</span>
-          <span style="color:var(--muted);font-size:.8rem">${t.p}</span>
-          <span style="color:var(--muted);font-size:.8rem">${t.w}</span>
-          <span style="color:var(--muted);font-size:.8rem">${t.gf}</span>
-          <span class="pts">${t.pts}</span>
-        </div>
-      `).join('')}
-    `;
-    container.appendChild(card);
-  });
-}
-
-// ══════════════════════════════════════════════
-// BUILD: SCORERS TABLE
-// ══════════════════════════════════════════════
-
-let currentScorers = 'goals';
-
-function buildScorers(type) {
-  currentScorers = type;
-  const data = SCORERS_DATA[type];
-  const max = data[0].val;
-  const body = document.getElementById('scorersBody');
-  body.innerHTML = data.map((p, i) => `
-    <tr>
-      <td class="rank ${i < 3 ? 'top' : ''}">${i + 1}</td>
-      <td>
-        <div class="player-name">${p.img} ${p.name}</div>
-        <div class="player-country">${p.country}</div>
-      </td>
-      <td>
-        <div class="goals-bar-wrap">
-          <div class="goals-bar" style="width:${(p.val/max*160)}px"></div>
-          <span class="goals-num">${p.val}</span>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-
-  // Animate bars
-  setTimeout(() => {
-    document.querySelectorAll('.goals-bar').forEach((bar, i) => {
-      const val = data[i].val;
-      bar.style.width = `${(val / max * 160)}px`;
-    });
-  }, 50);
-}
-
-function switchScorers(type, btn) {
-  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  buildScorers(type);
-}
-
-// ══════════════════════════════════════════════
-// BUILD: MATCHES TIMELINE
-// ══════════════════════════════════════════════
-
-function buildTimeline(matches = MATCHES_DATA) {
-  const tl = document.getElementById('matchTimeline');
-  tl.innerHTML = '';
-  matches.forEach(m => {
-    const item = document.createElement('div');
-    item.className = 'timeline-item';
-    const score = m.score || 'vs';
-    const liveBadge = m.status === 'live' ? '<span class="live-pill live">EN DIRECT</span>' : '';
-    const timeLabel = m.status === 'upcoming' && m.datetime ? `<span class="countdown" data-start="${m.datetime}">${formatCountdown(m.datetime)}</span>` : '<span class="countdown">À venir</span>';
-
-    item.innerHTML = `
-      <div class="timeline-dot"></div>
-      <div class="match-card">
-        <span class="match-date">${m.dateLabel || m.date}</span>
-        <div class="match-teams">
-          <span>${m.home}</span>
-          <span class="match-score">${score}</span>
-          <span>${m.away}</span>
-        </div>
-        <div class="match-meta">
-          <span class="match-stage">${m.stage}</span>
-          ${liveBadge || timeLabel}
-        </div>
-      </div>
-    `;
-    tl.appendChild(item);
-  });
-
-  // Countdowns and animation
-  updateCountdowns();
-  setInterval(updateCountdowns, 1000);
-
-  const items = tl.querySelectorAll('.timeline-item');
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach((e, i) => {
-      if (e.isIntersecting) {
-        setTimeout(() => e.target.classList.add('visible'), i * 80);
-      }
-    });
-  }, { threshold: 0.1 });
-  items.forEach(el => obs.observe(el));
-}
+const GROUP_PLACEHOLDERS = Array.from({ length: 16 }, (_, index) => ({
+  name: `Groupe ${String.fromCharCode(65 + index)}`,
+  teams: Array.from({ length: 4 }, (__, teamIndex) => ({
+    slot: `${String.fromCharCode(65 + index)}${teamIndex + 1}`,
+    name: 'TBD',
+    p: 0,
+    w: 0,
+    d: 0,
+    l: 0,
+    gf: 0,
+    ga: 0,
+    pts: 0,
+  })),
+}));
 
 function formatCountdown(start) {
   if (!start) return 'À venir';
@@ -1474,85 +1107,144 @@ function formatCountdown(start) {
   return `${days ? days + 'j ' : ''}${hours}h ${minutes}m`;
 }
 
+function formatDate(iso) {
+  if (!iso) return '';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function buildGroups(groups = []) {
+  const container = document.getElementById('groupsContainer');
+  container.innerHTML = '';
+  if (!groups.length) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Aucune donnée de groupe disponible</div>';
+    return;
+  }
+  groups.forEach(group => {
+    const card = document.createElement('div');
+    card.className = 'group-card';
+    card.innerHTML = `
+      <div class="group-head">${group.name}</div>
+      <div class="group-row" style="background:rgba(245,197,24,0.04)">
+        <span class="group-col-head">Équipe</span>
+        <span class="group-col-head">J</span>
+        <span class="group-col-head">G</span>
+        <span class="group-col-head">BP</span>
+        <span class="group-col-head pts">Pts</span>
+      </div>
+      ${group.teams.map((team, index) => `
+        <div class="group-row ${index < 2 ? 'qualified' : ''}">
+          <span>${team.slot} ${team.name}</span>
+          <span style="color:var(--muted);font-size:.8rem">${team.p ?? 0}</span>
+          <span style="color:var(--muted);font-size:.8rem">${team.w ?? 0}</span>
+          <span style="color:var(--muted);font-size:.8rem">${team.gf ?? 0}</span>
+          <span class="pts">${team.pts ?? 0}</span>
+        </div>
+      `).join('')}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderScorerTable(scorers = []) {
+  const body = document.getElementById('scorersBody');
+  if (!scorers.length) {
+    body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Aucun buteur disponible pour le moment</td></tr>';
+    return;
+  }
+  const max = scorers[0].val || 1;
+  body.innerHTML = scorers.map((player, index) => `
+    <tr>
+      <td class="rank ${index < 3 ? 'top' : ''}">${index + 1}</td>
+      <td>
+        <div class="player-name">${player.img || '⚽'} ${player.name}</div>
+        <div class="player-country">${player.country || ''}</div>
+      </td>
+      <td>
+        <div class="goals-bar-wrap">
+          <div class="goals-bar" style="width:${(player.val / max * 160)}px"></div>
+          <span class="goals-num">${player.val}</span>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function buildTimeline(matches = []) {
+  const tl = document.getElementById('matchTimeline');
+  tl.innerHTML = '';
+  if (!matches.length) {
+    tl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Aucun match disponible</div>';
+    return;
+  }
+  matches.slice().sort((a, b) => new Date(a.datetime) - new Date(b.datetime)).forEach(match => {
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    const score = match.status === 'finished' ? match.score : 'vs';
+    const liveBadge = match.status === 'live' ? '<span class="live-pill live">EN DIRECT</span>' : '';
+    const timeLabel = match.status === 'upcoming' && match.datetime ? `<span class="countdown" data-start="${match.datetime}">${formatCountdown(match.datetime)}</span>` : '<span class="countdown">À venir</span>';
+    item.innerHTML = `
+      <div class="timeline-dot"></div>
+      <div class="match-card">
+        <span class="match-date">${match.dateLabel || formatDate(match.datetime)}</span>
+        <div class="match-teams">
+          <span>${match.home}</span>
+          <span class="match-score">${score}</span>
+          <span>${match.away}</span>
+        </div>
+        <div class="match-meta">
+          <span class="match-stage">${match.stage}${match.group ? ' • ' + match.group : ''}</span>
+          ${liveBadge || timeLabel}
+        </div>
+      </div>
+    `;
+    tl.appendChild(item);
+  });
+  updateCountdowns();
+  setInterval(updateCountdowns, 1000);
+  document.querySelectorAll('.timeline-item').forEach((el, index) => {
+    setTimeout(() => el.classList.add('visible'), index * 50);
+  });
+}
+
 function updateCountdowns() {
   document.querySelectorAll('.countdown[data-start]').forEach(el => {
-    const start = el.dataset.start;
-    el.textContent = formatCountdown(start);
+    el.textContent = formatCountdown(el.dataset.start);
   });
 }
 
 function renderLiveSummary(data) {
   const summary = document.getElementById('liveSummary');
-  const upcoming = data.matches.find(match => match.status === 'upcoming');
-  const nextLabel = upcoming ? `${upcoming.home} vs ${upcoming.away} — ${upcoming.dateLabel}` : 'Aucun match suivant';
-  const statusText = data.live ? 'Match en direct détecté' : 'Données de pré-tournoi';
-  summary.innerHTML = `${statusText} • ${nextLabel} • Dernière mise à jour ${data.last_updated}`;
-}
-
-function renderOddsList(odds) {
-  const body = document.querySelector('#oddsTable tbody');
-  body.innerHTML = odds.map(o => `
-    <tr>
-      <td>${o.site}</td>
-      <td>${o.team}</td>
-      <td>${o.probability || '—'}</td>
-    </tr>
-  `).join('');
-}
-
-function updateOddsChart(odds) {
-  if (!oddsChartRef) return;
-  const labels = odds.map(o => o.site);
-  const values = odds.map(o => {
-    const parsed = parseInt(String(o.probability || '').replace('%', ''), 10);
-    return Number.isFinite(parsed) ? parsed : 0;
-  });
-  oddsChartRef.data.labels = labels;
-  oddsChartRef.data.datasets = [{
-    label: 'Probabilité bookmaker',
-    data: values,
-    borderColor: GOLD,
-    backgroundColor: 'rgba(245,197,24,0.4)',
-    fill: true,
-    tension: 0.3,
-    pointRadius: 4,
-  }];
-  oddsChartRef.update();
+  const liveCount = data.matches.filter(match => match.status === 'live').length;
+  const upcomingCount = data.matches.filter(match => match.status === 'upcoming').length;
+  const finishedCount = data.matches.filter(match => match.status === 'finished').length;
+  summary.innerHTML = `${data.live ? 'En direct' : 'A jour'} • En direct: ${liveCount} • À venir: ${upcomingCount} • Terminés: ${finishedCount} • Dernière mise à jour ${data.last_updated}`;
 }
 
 function renderHeroCounters(stats) {
-  const counters = document.querySelectorAll('[data-target]');
-  counters.forEach(el => {
-    const valueMap = {
-      104: stats.matches_played,
-      312: stats.goals,
-      48: stats.teams,
-      16: stats.host_cities,
-    };
-    const target = Number(el.dataset.target);
-    if (valueMap[target] !== undefined) {
-      el.dataset.target = valueMap[target];
-      el.textContent = '0';
-    }
+  document.querySelectorAll('[data-stat]').forEach(el => {
+    const field = el.dataset.stat;
+    const value = typeof stats[field] === 'number' ? stats[field] : (field === 'teams' ? 48 : field === 'host_cities' ? 16 : 0);
+    el.dataset.target = value;
+    el.textContent = '0';
   });
+}
+
+function getFallbackScorers(data) {
+  if (data.scorers && Array.isArray(data.scorers.goals)) return data.scorers.goals;
+  return [];
 }
 
 async function fetchLiveData() {
   try {
-    const response = await fetch(LIVE_API_URL);
-    if (!response.ok) throw new Error('Network response was not ok');
-    return await response.json();
+    const response = await fetch(API_ENDPOINT);
+    if (response.ok) return await response.json();
+    console.warn('API returned non-ok status', response.status);
   } catch (error) {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      try {
-        const fallback = await fetch(LOCAL_FALLBACK_API_URL);
-        if (fallback.ok) return await fallback.json();
-      } catch (fallbackError) {
-        // continue to default
-      }
-    }
-    return DEFAULT_LIVE_DATA;
+    console.warn('Impossible de récupérer l’API live:', error);
   }
+  return DEFAULT_LIVE_DATA;
 }
 
 function renderLiveBanner(data) {
@@ -1564,395 +1256,27 @@ function renderLiveBanner(data) {
   info.textContent = `Dernière mise à jour : ${data.last_updated}`;
 }
 
-// ══════════════════════════════════════════════
-// BUILD: POSSESSION / PASSES PROGRESS
-// ══════════════════════════════════════════════
-
-function buildProgress() {
-  const posData = [
-    { name: '🇪🇸 Espagne',   val: 68, max: 68, color: GOLD },
-    { name: '🇩🇪 Allemagne', val: 63, max: 68, color: BLUE },
-    { name: '🇧🇷 Brésil',    val: 61, max: 68, color: GREEN },
-    { name: '🇫🇷 France',    val: 58, max: 68, color: BLUE },
-    { name: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', val: 55, max: 68, color: RED },
-    { name: '🇦🇷 Argentine', val: 52, max: 68, color: GOLD },
-    { name: '🇵🇹 Portugal',  val: 50, max: 68, color: RED },
-    { name: '🇮🇹 Italie',    val: 48, max: 68, color: BLUE },
-  ];
-
-  const passData = [
-    { name: '🇪🇸 Espagne',   val: 742, max: 742, color: GOLD },
-    { name: '🇩🇪 Allemagne', val: 698, max: 742, color: BLUE },
-    { name: '🇮🇹 Italie',    val: 680, max: 742, color: BLUE },
-    { name: '🇧🇷 Brésil',    val: 665, max: 742, color: GREEN },
-    { name: '🇫🇷 France',    val: 642, max: 742, color: PURPLE },
-    { name: '🇵🇹 Portugal',  val: 620, max: 742, color: RED },
-    { name: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', val: 598, max: 742, color: RED },
-    { name: '🇦🇷 Argentine', val: 570, max: 742, color: GOLD },
-  ];
-
-  function renderProgress(listId, data) {
-    const list = document.getElementById(listId);
-    data.forEach(d => {
-      const div = document.createElement('div');
-      div.className = 'progress-item';
-      div.innerHTML = `
-        <div class="progress-head">
-          <span class="progress-name">${d.name}</span>
-          <span class="progress-val">${d.val}${listId === 'possessionList' ? '%' : ''}</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" data-width="${(d.val/d.max*100).toFixed(1)}" style="background:${d.color};width:0%"></div>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  renderProgress('possessionList', posData);
-  renderProgress('passesList', passData);
-
-  // Animate on visible
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.querySelectorAll('.progress-fill').forEach(fill => {
-          fill.style.width = fill.dataset.width + '%';
-        });
-      }
-    });
-  }, { threshold: 0.2 });
-
-  document.querySelectorAll('#possessionList, #passesList').forEach(el => obs.observe(el));
-}
-
-// ══════════════════════════════════════════════
-// BUILD: HEATMAP
-// ══════════════════════════════════════════════
-
-function buildHeatmap() {
-  const grid = document.getElementById('heatmapGrid');
-  // 90 minutes + extra time, grouped into 16 blocks of ~6min
-  const rawGoals = [
-    2,3,1,4,6,5,7,8,4,3,2,9,12,8,6,11,
-    4,3,5,6,4,3,2,5,8,7,4,3,9,11,14,10,
-    3,4,2,3,4,5,3,2,4,5,6,7,8,9,5,4,
-    4,3,5,4,2,3,4,5,6,7,8,5,4,3,6,7,
-    3,4,2,3,4,5,3,2,4,5,6,7,8,9,12,8,
-  ];
-
-  // Use only first 80 cells (make a proper 5x16)
-  const goals = rawGoals.slice(0, 80);
-  const max = Math.max(...goals);
-
-  for (let i = 0; i < 80; i++) {
-    const minute = Math.round((i / 80) * 90) + 1;
-    const val = goals[i];
-    const intensity = val / max;
-    const alpha = 0.05 + intensity * 0.95;
-    const cell = document.createElement('div');
-    cell.className = 'heatmap-cell';
-    cell.style.background = `rgba(245,197,24,${alpha.toFixed(2)})`;
-    cell.innerHTML = `<div class="tooltip">${minute}' — ${val} but${val > 1 ? 's' : ''}</div>`;
-    grid.appendChild(cell);
-  }
-}
-
-// ══════════════════════════════════════════════
-// CHARTS
-// ══════════════════════════════════════════════
-
-function initCharts() {
-  // 1. Goals by round
-  const ctxGoals = document.getElementById('chartGoalsRound').getContext('2d');
-  new Chart(ctxGoals, {
-    type: 'bar',
-    data: {
-      labels: ['Groupes', '1/8 finale', '1/4 finale', 'Demi-finales', 'Finale'],
-      datasets: [{
-        label: 'Buts totaux',
-        data: [224, 48, 18, 8, 3],
-        backgroundColor: ctx => {
-          const g = ctxGoals.createLinearGradient(0, 0, 0, 300);
-          g.addColorStop(0, 'rgba(245,197,24,0.85)');
-          g.addColorStop(1, 'rgba(245,197,24,0.1)');
-          return g;
-        },
-        borderColor: GOLD,
-        borderWidth: 1,
-        borderRadius: 2,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6B7A99' } },
-        x: { grid: { display: false }, ticks: { color: '#6B7A99' } }
-      }
-    }
-  });
-
-  // 2. Results donut
-  const ctxRes = document.getElementById('chartResults').getContext('2d');
-  new Chart(ctxRes, {
-    type: 'doughnut',
-    data: {
-      labels: ['Victoire normale', 'Après prolongations', 'Tirs aux buts'],
-      datasets: [{
-        data: [78, 14, 12],
-        backgroundColor: [GOLD, BLUE, RED],
-        borderColor: '#111827',
-        borderWidth: 3,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '72%',
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#6B7A99', padding: 16, font: { size: 11 } }
-        }
-      }
-    }
-  });
-
-  // 3. Goals by minute
-  const ctxMin = document.getElementById('chartMinutes').getContext('2d');
-  const minuteLabels = ['1-15', '16-30', '31-45', '45+', '46-60', '61-75', '76-90', '90+'];
-  const minuteData   = [28, 35, 42, 18, 38, 52, 71, 28];
-  new Chart(ctxMin, {
-    type: 'line',
-    data: {
-      labels: minuteLabels,
-      datasets: [{
-        label: 'Buts',
-        data: minuteData,
-        borderColor: GOLD,
-        backgroundColor: ctx => {
-          const g = ctxMin.createLinearGradient(0, 0, 0, 250);
-          g.addColorStop(0, 'rgba(245,197,24,0.3)');
-          g.addColorStop(1, 'rgba(245,197,24,0)');
-          return g;
-        },
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: GOLD,
-        pointRadius: 5,
-        pointHoverRadius: 8,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6B7A99' } },
-        x: { grid: { display: false }, ticks: { color: '#6B7A99' } }
-      }
-    }
-  });
-
-  // 4. Radar
-  const ctxRadar = document.getElementById('chartRadar').getContext('2d');
-  new Chart(ctxRadar, {
-    type: 'radar',
-    data: {
-      labels: ['Buts', 'Tirs', 'Dribbles', 'Passes clés', 'Duels gagnés', 'Dist. (km)'],
-      datasets: [
-        {
-          label: 'Mbappé',
-          data: [90, 85, 92, 75, 68, 88],
-          borderColor: GOLD,
-          backgroundColor: 'rgba(245,197,24,0.1)',
-          pointBackgroundColor: GOLD,
-        },
-        {
-          label: 'Haaland',
-          data: [80, 95, 60, 50, 82, 70],
-          borderColor: RED,
-          backgroundColor: 'rgba(230,57,70,0.1)',
-          pointBackgroundColor: RED,
-        },
-        {
-          label: 'Kane',
-          data: [75, 78, 68, 88, 75, 72],
-          borderColor: BLUE,
-          backgroundColor: 'rgba(59,130,246,0.1)',
-          pointBackgroundColor: BLUE,
-        },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: {
-        r: {
-          min: 0, max: 100,
-          ticks: { display: false },
-          grid: { color: 'rgba(255,255,255,0.08)' },
-          pointLabels: { color: '#6B7A99', font: { size: 11 } },
-          angleLines: { color: 'rgba(255,255,255,0.05)' }
-        }
-      },
-      plugins: {
-        legend: {
-          labels: { color: '#6B7A99', font: { size: 11 }, boxWidth: 12 }
-        }
-      }
-    }
-  });
-
-  // 5. Defense horizontal bar
-  const ctxDef = document.getElementById('chartDefense').getContext('2d');
-  new Chart(ctxDef, {
-    type: 'bar',
-    data: {
-      labels: ['🇮🇹 Italie', '🇺🇾 Uruguay', '🇧🇷 Brésil', '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', '🇦🇷 Argentine', '🇫🇷 France'],
-      datasets: [{
-        label: 'Buts encaissés',
-        data: [2, 1, 3, 2, 4, 5],
-        backgroundColor: [GREEN, GREEN, GOLD, GOLD, ORANGE, RED],
-        borderRadius: 2,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6B7A99' } },
-        y: { grid: { display: false }, ticks: { color: '#E8EDF5', font: { size: 11 } } }
-      }
-    }
-  });
-
-  // 6. XG vs réels
-  const ctxXG = document.getElementById('chartXG').getContext('2d');
-  new Chart(ctxXG, {
-    type: 'bar',
-    data: {
-      labels: ['🇧🇷', '🇫🇷', '🏴󠁧󠁢󠁥󠁮󠁧󠁿', '🇪🇸', '🇦🇷', '🇮🇹'],
-      datasets: [
-        {
-          label: 'xG attendu',
-          data: [7.2, 6.8, 8.5, 7.0, 5.5, 6.2],
-          backgroundColor: 'rgba(59,130,246,0.5)',
-          borderColor: BLUE,
-          borderWidth: 1,
-          borderRadius: 2,
-        },
-        {
-          label: 'Buts réels',
-          data: [8, 7, 9, 8, 6, 7],
-          backgroundColor: 'rgba(245,197,24,0.7)',
-          borderColor: GOLD,
-          borderWidth: 1,
-          borderRadius: 2,
-        }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: '#6B7A99', font: { size: 11 }, boxWidth: 12 } } },
-      scales: {
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6B7A99' } },
-        x: { grid: { display: false }, ticks: { color: '#E8EDF5', font: { size: 14 } } }
-      }
-    }
-  });
-
-  // 7. Distance bar
-  const ctxDist = document.getElementById('chartDistance').getContext('2d');
-  new Chart(ctxDist, {
-    type: 'polarArea',
-    data: {
-      labels: ['🇩🇪 All.', '🇫🇷 Fra.', '🇧🇷 Bré.', '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Ang.', '🇪🇸 Esp.', '🇦🇷 Arg.', '🇵🇹 Por.', '🇮🇹 Ita.'],
-      datasets: [{
-        data: [115, 112, 110, 114, 108, 106, 111, 109],
-        backgroundColor: [
-          'rgba(245,197,24,0.7)', 'rgba(59,130,246,0.7)', 'rgba(34,197,94,0.7)',
-          'rgba(230,57,70,0.7)', 'rgba(168,85,247,0.7)', 'rgba(245,197,24,0.5)',
-          'rgba(249,115,22,0.7)', 'rgba(59,130,246,0.5)',
-        ],
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#6B7A99', font: { size: 10 }, boxWidth: 10 } }
-      },
-      scales: {
-        r: { ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.06)' } }
-      }
-    }
-  });
-
-  // 8. Odds evolution line
-  const ctxOdds = document.getElementById('chartOdds').getContext('2d');
-  oddsChartRef = new Chart(ctxOdds, {
-    type: 'line',
-    data: {
-      labels: ['Avant tournoi', 'Groupes', '1/8', '1/4', '1/2', 'Finale'],
-      datasets: [
-        { label: '🇫🇷 France',      data: [18, 20, 25, 30, 45, 60], borderColor: BLUE,   tension: 0.3, fill: false, pointRadius: 4 },
-        { label: '🇧🇷 Brésil',      data: [22, 28, 30, 20, 0, 0],   borderColor: GREEN,  tension: 0.3, fill: false, pointRadius: 4 },
-        { label: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre', data: [15, 18, 22, 28, 35, 40], borderColor: RED,    tension: 0.3, fill: false, pointRadius: 4 },
-        { label: '🇦🇷 Argentine',   data: [20, 15, 18, 22, 0, 0],   borderColor: GOLD,   tension: 0.3, fill: false, pointRadius: 4 },
-        { label: '🇪🇸 Espagne',     data: [16, 19, 0, 0, 0, 0],     borderColor: ORANGE, tension: 0.3, fill: false, pointRadius: 4 },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#6B7A99', font: { size: 11 }, boxWidth: 12 } }
-      },
-      scales: {
-        y: {
-          title: { display: true, text: 'Probabilité %', color: '#6B7A99' },
-          grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: { color: '#6B7A99' }
-        },
-        x: { grid: { display: false }, ticks: { color: '#6B7A99' } }
-      }
-    }
-  });
-}
-
-// ══════════════════════════════════════════════
-// COUNTER ANIMATION
-// ══════════════════════════════════════════════
-
 function animateCounters() {
-  document.querySelectorAll('[data-target]').forEach(el => {
-    const target = parseInt(el.dataset.target);
+  document.querySelectorAll('[data-stat]').forEach(el => {
+    const target = parseInt(el.dataset.target, 10) || 0;
     let current = 0;
-    const step = target / 60;
+    const step = Math.max(1, Math.round(target / 60));
     const interval = setInterval(() => {
       current = Math.min(current + step, target);
-      el.textContent = Math.round(current);
+      el.textContent = current.toString();
       if (current >= target) clearInterval(interval);
     }, 20);
   });
 }
 
-// ══════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════
-
 document.addEventListener('DOMContentLoaded', async () => {
   const liveData = await fetchLiveData();
-  buildGroups();
-  buildScorers('goals');
+  buildGroups(liveData.groups.length ? liveData.groups : GROUP_PLACEHOLDERS);
+  renderScorerTable(getFallbackScorers(liveData));
   buildTimeline(liveData.matches);
-  buildProgress();
-  buildHeatmap();
   renderHeroCounters(liveData.stats);
   renderLiveBanner(liveData);
   renderLiveSummary(liveData);
-  renderOddsList(liveData.odds);
-
-  setTimeout(initCharts, 100);
-  setTimeout(() => updateOddsChart(liveData.odds), 350);
   setTimeout(animateCounters, 400);
 });
 </script>
