@@ -6,900 +6,165 @@
 <meta name="api-endpoint" content="https://cdm2026.onrender.com/api/live.json">
 <title>FIFA World Cup 2026 — Stats Dashboard</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap');
-
-  :root {
-    --gold: #F5C518;
-    --gold-dim: #c9a010;
-    --red: #E63946;
-    --bg: #060A10;
-    --bg2: #0D1420;
-    --bg3: #141C2E;
-    --card: #111827;
-    --border: rgba(245,197,24,0.15);
-    --text: #E8EDF5;
-    --muted: #6B7A99;
-    --green: #22C55E;
-    --blue: #3B82F6;
-    --purple: #A855F7;
-    --orange: #F97316;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    font-weight: 300;
-    overflow-x: hidden;
-    cursor: default;
-  }
-
-  /* ─── NOISE OVERLAY ─── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* ─── HERO ─── */
-  header {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    text-align: center;
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(245,197,24,0.12) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(230,57,70,0.08) 0%, transparent 60%),
-      var(--bg);
-  }
-
-  .globe-ring {
-    position: absolute;
-    border-radius: 50%;
-    border: 1px solid;
-    animation: spin linear infinite;
-  }
-
-  .ring1 {
-    width: 600px; height: 600px;
-    border-color: rgba(245,197,24,0.06);
-    animation-duration: 40s;
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-  }
-  .ring2 {
-    width: 450px; height: 450px;
-    border-color: rgba(245,197,24,0.1);
-    animation-duration: 30s;
-    animation-direction: reverse;
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-  }
-  .ring3 {
-    width: 300px; height: 300px;
-    border-color: rgba(245,197,24,0.15);
-    animation-duration: 20s;
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-  }
-
-  .ring1::after, .ring2::after, .ring3::after {
-    content: '';
-    position: absolute;
-    width: 6px; height: 6px;
-    background: var(--gold);
-    border-radius: 50%;
-    top: -3px; left: 50%;
-    box-shadow: 0 0 12px var(--gold);
-  }
-
-  @keyframes spin {
-    from { transform: translate(-50%,-50%) rotate(0deg); }
-    to { transform: translate(-50%,-50%) rotate(360deg); }
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 2;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid var(--gold);
-    padding: 6px 16px;
-    border-radius: 2px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 32px;
-    animation: fadeUp 0.8s ease both;
-  }
-
-  .hero-badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--gold);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--gold);
-    animation: pulse 2s ease infinite;
-  }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: clamp(4rem, 12vw, 10rem);
-    line-height: 0.9;
-    text-transform: uppercase;
-    letter-spacing: -0.02em;
-    animation: fadeUp 0.8s 0.1s ease both;
-  }
-
-  h1 .line1 { display: block; color: var(--text); }
-  h1 .line2 {
-    display: block;
-    color: transparent;
-    -webkit-text-stroke: 2px var(--gold);
-  }
-  h1 .line3 { display: block; color: var(--gold); }
-
-  .hero-sub {
-    margin-top: 24px;
-    font-size: 1rem;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    text-transform: uppercase;
-    animation: fadeUp 0.8s 0.2s ease both;
-  }
-
-  .hero-stats-row {
-    display: flex;
-    gap: 48px;
-    margin-top: 64px;
-    animation: fadeUp 0.8s 0.3s ease both;
-  }
-
-  .hero-stat {
-    text-align: center;
-  }
-
-  .hero-stat-val {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 3rem;
-    color: var(--gold);
-    display: block;
-    line-height: 1;
-  }
-
-  .hero-stat-lab {
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
-
-  .scroll-cta {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    animation: fadeUp 1s 0.6s ease both;
-  }
-
-  .scroll-line {
-    width: 1px;
-    height: 60px;
-    background: linear-gradient(to bottom, var(--gold), transparent);
-    animation: scrollAnim 2s ease infinite;
-  }
-
-  @keyframes scrollAnim {
-    0%,100%{transform:scaleY(1);transform-origin:top}
-    50%{transform:scaleY(0.3);transform-origin:top}
-  }
-
-  @keyframes fadeUp {
-    from { opacity:0; transform: translateY(30px); }
-    to { opacity:1; transform: translateY(0); }
-  }
-
-  /* ─── NAV ─── */
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(6,10,16,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 40px;
-    display: flex;
-    align-items: center;
-    gap: 0;
-    height: 56px;
-  }
-
-  .nav-logo {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 1.1rem;
-    color: var(--gold);
-    letter-spacing: 0.05em;
-    margin-right: auto;
-    text-transform: uppercase;
-  }
-
-  .nav-links {
-    display: flex;
-    list-style: none;
-    gap: 4px;
-  }
-
-  .nav-links a {
-    display: block;
-    padding: 8px 16px;
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-decoration: none;
-    border-radius: 2px;
-    transition: color 0.2s, background 0.2s;
-  }
-
-  .nav-links a:hover {
-    color: var(--gold);
-    background: rgba(245,197,24,0.07);
-  }
-
-  /* ─── LAYOUT ─── */
-  main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 40px 100px;
-  }
-
-  section {
-    margin-top: 100px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 40px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 16px;
-  }
-
-  .section-number {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    color: var(--gold);
-    opacity: 0.6;
-  }
-
-  .section-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 2.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    line-height: 1;
-  }
-
-  .section-title span { color: var(--gold); }
-
-  /* ─── CARDS GRID ─── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    margin-bottom: 48px;
-  }
-
-  .kpi-card {
-    background: var(--card);
-    padding: 32px 24px;
-    position: relative;
-    overflow: hidden;
-    transition: background 0.3s;
-  }
-
-  .kpi-card:hover { background: var(--bg3); }
-
-  .kpi-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--gold);
-    transform: scaleX(0);
-    transition: transform 0.3s;
-    transform-origin: left;
-  }
-
-  .kpi-card:hover::after { transform: scaleX(1); }
-
-  .kpi-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-
-  .kpi-val {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 3.5rem;
-    line-height: 1;
-    color: var(--text);
-  }
-
-  .kpi-unit {
-    font-size: 1rem;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  .kpi-sub {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-top: 8px;
-  }
-
-  .kpi-accent {
-    position: absolute;
-    top: 16px; right: 16px;
-    font-size: 1.8rem;
-    opacity: 0.08;
-  }
-
-  /* ─── CHART PANELS ─── */
-  .chart-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-  }
-
-  .chart-grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-
-  .chart-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 28px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .chart-panel.wide {
-    grid-column: span 2;
-  }
-
-  .chart-panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, var(--gold), transparent);
-  }
-
-  .chart-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 4px;
-  }
-
-  .chart-sub {
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-bottom: 24px;
-  }
-
-  .chart-wrap {
-    position: relative;
-    width: 100%;
-    height: 280px;
-  }
-
-  .chart-wrap.tall { height: 340px; }
-  .chart-wrap.short { height: 220px; }
-
-  /* ─── TABLE ─── */
-  .table-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .table-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .table-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .filter-tabs {
-    display: flex;
-    gap: 4px;
-  }
-
-  .filter-tab {
-    padding: 4px 12px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    font-family: 'Barlow', sans-serif;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 0.2s;
-  }
-
-  .filter-tab.active {
-    background: var(--gold);
-    color: var(--bg);
-    border-color: var(--gold);
-    font-weight: 600;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  thead th {
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-  }
-
-  tbody tr {
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    transition: background 0.15s;
-  }
-
-  tbody tr:hover { background: rgba(245,197,24,0.04); }
-
-  tbody td {
-    padding: 12px 16px;
-    font-size: 0.88rem;
-  }
-
-  .rank {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--muted);
-    width: 40px;
-  }
-
-  .rank.top { color: var(--gold); }
-
-  .flag {
-    font-size: 1.3rem;
-    margin-right: 8px;
-  }
-
-  .player-name {
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .player-country {
-    font-size: 0.75rem;
-    color: var(--muted);
-  }
-
-  .goals-bar-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .goals-bar {
-    height: 4px;
-    border-radius: 2px;
-    background: linear-gradient(90deg, var(--gold), var(--gold-dim));
-    transition: width 0.5s ease;
-  }
-
-  .goals-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--gold);
-    min-width: 24px;
-  }
-
-  /* ─── GROUPS TABLE ─── */
-  .groups-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-
-  .group-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .group-head {
-    background: var(--gold);
-    padding: 8px 16px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 0.9rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--bg);
-  }
-
-  .group-row {
-    display: grid;
-    grid-template-columns: 1fr auto auto auto auto;
-    gap: 4px;
-    padding: 8px 14px;
-    font-size: 0.82rem;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    align-items: center;
-    transition: background 0.15s;
-  }
-
-  .group-row:hover { background: rgba(245,197,24,0.05); }
-  .group-row.qualified { border-left: 2px solid var(--gold); }
-
-  .group-col-head {
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .pts { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--gold); }
-
-  /* ─── MATCH TIMELINE ─── */
-  .timeline {
-    position: relative;
-    padding-left: 32px;
-  }
-
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 12px;
-    top: 0; bottom: 0;
-    width: 1px;
-    background: linear-gradient(to bottom, var(--gold), transparent);
-  }
-
-  .timeline-item {
-    position: relative;
-    margin-bottom: 24px;
-    opacity: 0;
-    transform: translateX(-20px);
-    transition: all 0.4s ease;
-  }
-
-  .timeline-item.visible {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  .timeline-dot {
-    position: absolute;
-    left: -26px;
-    top: 12px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--gold);
-    box-shadow: 0 0 10px var(--gold);
-  }
-
-  .match-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-
-  .match-card:hover {
-    border-color: rgba(245,197,24,0.4);
-    background: var(--bg3);
-  }
-
-  .match-date {
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    min-width: 80px;
-  }
-
-  .match-teams {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 1.05rem;
-    letter-spacing: 0.05em;
-  }
-
-  .match-score {
-    background: var(--bg2);
-    padding: 4px 12px;
-    border-radius: 2px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 1.3rem;
-    color: var(--gold);
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-  }
-
-  .match-stage {
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    min-width: 80px;
-    text-align: right;
-  }
-
-  .match-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    min-width: 130px;
-    text-align: right;
-  }
-
-  .countdown {
-    color: var(--gold);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-  }
-
-  .live-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(245,197,24,0.18);
-    color: var(--gold);
-    background: rgba(245,197,24,0.08);
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-  }
-
-  .live-pill.live {
-    border-color: rgba(34,197,94,0.35);
-    background: rgba(34,197,94,0.12);
-    color: var(--green);
-  }
-
-  .hero-live-banner {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    margin-top: 24px;
-  }
-
-  .odds-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 14px;
-  }
-
-  .odds-table th,
-  .odds-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    font-size: 0.82rem;
-    color: var(--text);
-  }
-
-  .odds-table th {
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.7rem;
-  }
-
-  .odds-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(0,0,0,0.12);
-    color: var(--gold);
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-  }
-
-  /* ─── HEATMAP ─── */
-  .heatmap-grid {
-    display: grid;
-    grid-template-columns: repeat(16, 1fr);
-    gap: 3px;
-    padding: 8px 0;
-  }
-
-  .heatmap-cell {
-    aspect-ratio: 1;
-    border-radius: 2px;
-    background: var(--bg3);
-    cursor: pointer;
-    transition: transform 0.15s;
-    position: relative;
-  }
-
-  .heatmap-cell:hover {
-    transform: scale(1.3);
-    z-index: 10;
-  }
-
-  .tooltip {
-    display: none;
-    position: absolute;
-    bottom: 120%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--bg);
-    border: 1px solid var(--gold);
-    padding: 6px 10px;
-    font-size: 0.72rem;
-    white-space: nowrap;
-    z-index: 20;
-    pointer-events: none;
-  }
-
-  .heatmap-cell:hover .tooltip { display: block; }
-
-  /* ─── FOOTER ─── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 40px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-  }
-
-  footer span { color: var(--gold); }
-
-  /* ─── COUNTER ANIMATION ─── */
-  .count-up { display: inline-block; }
-
-  /* ─── PROGRESS BARS ─── */
-  .progress-list { display: flex; flex-direction: column; gap: 14px; }
-
-  .progress-item {}
-
-  .progress-head {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 0.82rem;
-  }
-
-  .progress-name { color: var(--text); }
-  .progress-val { color: var(--gold); font-family: 'Barlow Condensed'; font-weight: 700; }
-
-  .progress-track {
-    height: 4px;
-    background: var(--bg3);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
-    width: 0;
-  }
-
-  /* ─── RESPONSIVE ─── */
-  @media(max-width: 900px) {
-    main { padding: 0 20px 60px; }
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
-    .chart-panel.wide { grid-column: span 1; }
-    .groups-grid { grid-template-columns: repeat(2, 1fr); }
-    nav { padding: 0 20px; }
-    .nav-links { display: none; }
-    .hero-stats-row { gap: 28px; }
-  }
-
-  /* ─── GLOW EFFECTS ─── */
-  .glow { box-shadow: 0 0 30px rgba(245,197,24,0.1); }
-
-  /* ─── COUNTRY BADGES ─── */
-  .country-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 8px;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    font-size: 0.75rem;
-    color: var(--muted);
-  }
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap');
+
+:root {
+  --gold: #F5C518;
+  --gold-dim: #c9a010;
+  --red: #E63946;
+  --bg: #060A10;
+  --bg2: #0D1420;
+  --bg3: #141C2E;
+  --card: #111827;
+  --border: rgba(245,197,24,0.15);
+  --text: #E8EDF5;
+  --muted: #6B7A99;
+  --green: #22C55E;
+  --blue: #3B82F6;
+  --purple: #A855F7;
+  --orange: #F97316;
+  /* Bookmaker colors */
+  --betclic: #FF6B35;
+  --winamax: #E8002D;
+  --unibet:  #007B5E;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-weight:300;overflow-x:hidden;}
+
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+
+/* ── HERO ── */
+header{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;text-align:center;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(245,197,24,.12) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(230,57,70,.08) 0%,transparent 60%),var(--bg);}
+.globe-ring{position:absolute;border-radius:50%;border:1px solid;animation:spin linear infinite;}
+.ring1{width:600px;height:600px;border-color:rgba(245,197,24,.06);animation-duration:40s;top:50%;left:50%;transform:translate(-50%,-50%);}
+.ring2{width:450px;height:450px;border-color:rgba(245,197,24,.10);animation-duration:30s;animation-direction:reverse;top:50%;left:50%;transform:translate(-50%,-50%);}
+.ring3{width:300px;height:300px;border-color:rgba(245,197,24,.15);animation-duration:20s;top:50%;left:50%;transform:translate(-50%,-50%);}
+.ring1::after,.ring2::after,.ring3::after{content:'';position:absolute;width:6px;height:6px;background:var(--gold);border-radius:50%;top:-3px;left:50%;box-shadow:0 0 12px var(--gold);}
+@keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
+.hero-content{position:relative;z-index:2;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold);padding:6px 16px;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:32px;animation:fadeUp .8s ease both;}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;box-shadow:0 0 8px var(--gold);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(4rem,12vw,10rem);line-height:.9;text-transform:uppercase;letter-spacing:-.02em;animation:fadeUp .8s .1s ease both;}
+h1 .line1{display:block;color:var(--text);}
+h1 .line2{display:block;color:transparent;-webkit-text-stroke:2px var(--gold);}
+h1 .line3{display:block;color:var(--gold);}
+.hero-sub{margin-top:24px;font-size:1rem;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;animation:fadeUp .8s .2s ease both;}
+.hero-stats-row{display:flex;gap:48px;margin-top:64px;animation:fadeUp .8s .3s ease both;}
+.hero-stat{text-align:center;}
+.hero-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:3rem;color:var(--gold);display:block;line-height:1;}
+.hero-stat-lab{font-size:.7rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-top:4px;}
+.scroll-cta{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;animation:fadeUp 1s .6s ease both;}
+.scroll-line{width:1px;height:60px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scrollAnim 2s ease infinite;}
+@keyframes scrollAnim{0%,100%{transform:scaleY(1);transform-origin:top}50%{transform:scaleY(.3);transform-origin:top}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:100;background:rgba(6,10,16,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;height:56px;}
+.nav-logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;color:var(--gold);letter-spacing:.05em;margin-right:auto;text-transform:uppercase;}
+.nav-links{display:flex;list-style:none;gap:4px;}
+.nav-links a{display:block;padding:8px 16px;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-radius:2px;transition:color .2s,background .2s;}
+.nav-links a:hover{color:var(--gold);background:rgba(245,197,24,.07);}
+
+/* ── LAYOUT ── */
+main{max-width:1400px;margin:0 auto;padding:0 40px 100px;}
+section{margin-top:100px;}
+.section-header{display:flex;align-items:baseline;gap:16px;margin-bottom:40px;border-bottom:1px solid var(--border);padding-bottom:16px;}
+.section-number{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;letter-spacing:.2em;color:var(--gold);opacity:.6;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:2.5rem;text-transform:uppercase;letter-spacing:.03em;line-height:1;}
+.section-title span{color:var(--gold);}
+
+/* ── KPI ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:48px;}
+.kpi-card{background:var(--card);padding:32px 24px;position:relative;overflow:hidden;transition:background .3s;}
+.kpi-card:hover{background:var(--bg3);}
+.kpi-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transition:transform .3s;transform-origin:left;}
+.kpi-card:hover::after{transform:scaleX(1);}
+.kpi-label{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.kpi-val{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:3.5rem;line-height:1;color:var(--text);}
+.kpi-sub{font-size:.8rem;color:var(--muted);margin-top:8px;}
+.kpi-accent{position:absolute;top:16px;right:16px;font-size:1.8rem;opacity:.08;}
+
+/* ── GROUPES ── */
+.groups-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.group-card{background:var(--card);border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+.group-head{background:var(--gold);padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.15em;text-transform:uppercase;color:var(--bg);}
+.group-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:4px;padding:8px 14px;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.04);align-items:center;transition:background .15s;}
+.group-row:hover{background:rgba(245,197,24,.05);}
+.group-col-head{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+.pts{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--gold);}
+
+/* ── TIMELINE MATCHS ── */
+.timeline{position:relative;padding-left:32px;}
+.timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--gold),transparent);}
+.timeline-item{position:relative;margin-bottom:20px;opacity:0;transform:translateX(-20px);transition:all .4s ease;}
+.timeline-item.visible{opacity:1;transform:translateX(0);}
+.timeline-dot{position:absolute;left:-26px;top:18px;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);}
+
+/* ── MATCH CARD ── */
+.match-card{background:var(--card);border:1px solid var(--border);border-radius:2px;overflow:hidden;cursor:pointer;transition:border-color .2s,background .2s;}
+.match-card:hover{border-color:rgba(245,197,24,.4);background:var(--bg3);}
+.match-header{display:flex;align-items:center;gap:20px;padding:16px 20px;}
+.match-date{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;min-width:80px;}
+.match-teams{flex:1;display:flex;align-items:center;gap:12px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1.05rem;letter-spacing:.05em;}
+.match-score{background:var(--bg2);padding:4px 12px;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.3rem;color:var(--gold);letter-spacing:.05em;white-space:nowrap;}
+.match-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:120px;}
+.match-stage{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+.live-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;}
+.live-pill.upcoming{border:1px solid rgba(245,197,24,.18);color:var(--gold);background:rgba(245,197,24,.08);}
+.live-pill.live{border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.12);color:var(--green);}
+.live-pill.finished{border:1px solid rgba(107,122,153,.3);background:rgba(107,122,153,.1);color:var(--muted);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.5s ease infinite;}
+
+/* ── ODDS PANEL ── */
+.odds-panel{border-top:1px solid var(--border);padding:12px 20px 16px;background:rgba(0,0,0,.2);}
+.odds-panel-title{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.odds-bookmakers{display:flex;flex-direction:column;gap:8px;}
+.odds-row{display:flex;align-items:center;gap:10px;}
+.bookie-logo{display:flex;align-items:center;gap:6px;min-width:110px;}
+.bookie-icon{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#fff;flex-shrink:0;}
+.bookie-icon.betclic{background:var(--betclic);}
+.bookie-icon.winamax{background:var(--winamax);}
+.bookie-icon.unibet{background:var(--unibet);}
+.bookie-name{font-size:.72rem;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;}
+.odds-cells{display:flex;gap:6px;flex:1;}
+.odd-cell{flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 4px;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);transition:background .15s,border-color .15s;cursor:pointer;text-decoration:none;}
+.odd-cell:hover{background:rgba(245,197,24,.1);border-color:rgba(245,197,24,.3);}
+.odd-label{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.odd-val{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--text);}
+.odd-val.best{color:var(--gold);}
+.odds-source-note{font-size:.6rem;color:var(--muted);opacity:.5;margin-top:6px;text-align:right;font-style:italic;}
+
+/* ── FILTER TABS ── */
+.filter-tabs{display:flex;gap:4px;margin-bottom:24px;}
+.filter-tab{padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Barlow',sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;}
+.filter-tab.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600;}
+
+/* ── HERO LIVE BANNER ── */
+.hero-live-banner{display:inline-flex;align-items:center;justify-content:center;gap:14px;margin-top:24px;}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:40px;text-align:center;color:var(--muted);font-size:.78rem;letter-spacing:.08em;}
+footer span{color:var(--gold);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  main{padding:0 16px 60px;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .groups-grid{grid-template-columns:repeat(2,1fr);}
+  nav{padding:0 16px;}
+  .nav-links{display:none;}
+  .hero-stats-row{gap:24px;}
+  .odds-cells{gap:4px;}
+  .bookie-logo{min-width:90px;}
+  .odd-val{font-size:.88rem;}
+}
+@media(max-width:500px){
+  .odds-row{flex-direction:column;align-items:flex-start;}
+  .bookie-logo{min-width:unset;}
+}
 </style>
 </head>
 <body>
@@ -910,8 +175,7 @@
   <ul class="nav-links">
     <li><a href="#apercu">Aperçu</a></li>
     <li><a href="#groupes">Groupes</a></li>
-    <li><a href="#buteurs">Buteurs</a></li>
-    <li><a href="#matchs">Matchs</a></li>
+    <li><a href="#matchs">Matchs & Cotes</a></li>
   </ul>
 </nav>
 
@@ -921,7 +185,6 @@
   <div class="ring1 globe-ring"></div>
   <div class="ring2 globe-ring"></div>
   <div class="ring3 globe-ring"></div>
-
   <div class="hero-content">
     <div class="hero-badge">Édition Spéciale • 48 Nations • USA / Canada / Mexique</div>
     <h1>
@@ -929,32 +192,29 @@
       <span class="line2">World</span>
       <span class="line3">Cup 2026</span>
     </h1>
-    <p class="hero-sub">Tableau de bord statistique complet</p>
-    <div class="hero-live-banner" id="heroLiveBanner">
-      <span class="hero-badge live-pill offline" id="liveIndicator">STATUT : HORS LIGNE</span>
-      <span id="heroLiveInfo">Actualisé au dernier rechargement</span>
+    <p class="hero-sub">Tableau de bord statistique & cotes en direct</p>
+    <div class="hero-live-banner">
+      <span class="hero-badge live-pill upcoming" id="liveIndicator">STATUT : CHARGEMENT…</span>
     </div>
-
     <div class="hero-stats-row">
       <div class="hero-stat">
-        <span class="hero-stat-val" data-stat="matches_played">0</span>
+        <span class="hero-stat-val" data-stat="matches_played">—</span>
         <span class="hero-stat-lab">Matchs joués</span>
       </div>
       <div class="hero-stat">
-        <span class="hero-stat-val" data-stat="goals">0</span>
+        <span class="hero-stat-val" data-stat="goals">—</span>
         <span class="hero-stat-lab">Buts marqués</span>
       </div>
       <div class="hero-stat">
-        <span class="hero-stat-val" data-stat="teams">0</span>
+        <span class="hero-stat-val" data-stat="teams">—</span>
         <span class="hero-stat-lab">Nations</span>
       </div>
       <div class="hero-stat">
-        <span class="hero-stat-val" data-stat="host_cities">0</span>
+        <span class="hero-stat-val" data-stat="host_cities">—</span>
         <span class="hero-stat-lab">Villes hôtes</span>
       </div>
     </div>
   </div>
-
   <div class="scroll-cta">
     <div class="scroll-line"></div>
     Explorer
@@ -964,332 +224,353 @@
 <!-- MAIN -->
 <main>
 
-  <!-- ─── KPI OVERVIEW ─── -->
+  <!-- KPI -->
   <section id="apercu">
     <div class="section-header">
       <span class="section-number">01 —</span>
       <h2 class="section-title">Vue d'ensemble <span>du tournoi</span></h2>
     </div>
-
-    <div class="kpi-grid glow">
+    <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-label">Matchs joués</div>
-        <div class="kpi-val" data-stat="matches_played">0</div>
+        <div class="kpi-val" data-stat="matches_played">—</div>
         <div class="kpi-sub">CDM 2026</div>
         <div class="kpi-accent">🏟️</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Buts marqués</div>
-        <div class="kpi-val" data-stat="goals">0</div>
+        <div class="kpi-val" data-stat="goals">—</div>
         <div class="kpi-sub">Total du tournoi</div>
         <div class="kpi-accent">⚽</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Nations</div>
-        <div class="kpi-val" data-stat="teams">0</div>
+        <div class="kpi-val" data-stat="teams">—</div>
         <div class="kpi-sub">Format 48 équipes</div>
         <div class="kpi-accent">🌍</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Villes hôtes</div>
-        <div class="kpi-val" data-stat="host_cities">0</div>
+        <div class="kpi-val" data-stat="host_cities">—</div>
         <div class="kpi-sub">USA / Canada / Mexique</div>
         <div class="kpi-accent">🗽</div>
       </div>
     </div>
   </section>
 
-  <!-- ─── GROUPES ─── -->
+  <!-- GROUPES -->
   <section id="groupes">
     <div class="section-header">
       <span class="section-number">02 —</span>
-      <h2 class="section-title">Classements <span>des{
-  "live": false,
-  "last_updated": "2026-05-25 17:51 UTC",
-  "stats": {
-    "matches_played": 0,
-    "goals": 0,
-    "teams": 48,
-    "host_cities": 16
-  },
-  "matches": [],
-  "scorers": []
-} groupes</span></h2>
+      <h2 class="section-title">Phase de <span>groupes</span></h2>
     </div>
-
-    <div class="groups-grid" id="groupsContainer"></div>
-  </section>
-
-  <!-- ─── BUTEURS ─── -->
-  <section id="buteurs">
-    <div class="section-header">
-      <span class="section-number">03 —</span>
-      <h2 class="section-title">Meilleurs <span>buteurs</span></h2>
-    </div>
-
-    <div class="chart-grid">
-      <div class="table-panel">
-        <div class="table-header">
-          <div class="table-title">Top 10 — Buts</div>
-          <div class="filter-tabs">
-            <button class="filter-tab active" onclick="switchScorers('goals',this)">Buts</button>
-            <button class="filter-tab" onclick="switchScorers('assists',this)">Passes D.</button>
-            <button class="filter-tab" onclick="switchScorers('shots',this)">Tirs</button>
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Joueur</th>
-              <th>Buts</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="scorersBody"></tbody>
-        </table>
-      </div>
+    <div class="groups-grid" id="groupsGrid">
+      <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;">Chargement des groupes…</div>
     </div>
   </section>
 
-  <!-- ─── MATCHS ─── -->
+  <!-- MATCHS & COTES -->
   <section id="matchs">
     <div class="section-header">
-      <span class="section-number">04 —</span>
-      <h2 class="section-title">Tous les <span>matchs</span></h2>
+      <span class="section-number">03 —</span>
+      <h2 class="section-title">Matchs <span>& Cotes</span></h2>
     </div>
 
-    <div class="chart-panel" style="margin-bottom:24px">
-      <div class="chart-title">Statut des matchs en direct</div>
-      <div class="chart-sub" id="liveSummary">Chargement des données en direct...</div>
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab active" data-filter="all">Tous</button>
+      <button class="filter-tab" data-filter="upcoming">À venir</button>
+      <button class="filter-tab" data-filter="live">En direct</button>
+      <button class="filter-tab" data-filter="finished">Terminés</button>
     </div>
 
-    <div class="timeline" id="matchTimeline"></div>
+    <!-- Légende bookmakers -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+      <span style="font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Cotes proposées par :</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:.78rem;">
+        <span class="bookie-icon betclic">B</span>
+        <span style="color:var(--betclic);font-weight:600;">Betclic</span>
+      </span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:.78rem;">
+        <span class="bookie-icon winamax">W</span>
+        <span style="color:var(--winamax);font-weight:600;">Winamax</span>
+      </span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:.78rem;">
+        <span class="bookie-icon unibet">U</span>
+        <span style="color:var(--unibet);font-weight:600;">Unibet</span>
+      </span>
+      <span id="oddsSourceNote" style="font-size:.68rem;color:var(--muted);font-style:italic;"></span>
+    </div>
+
+    <div class="timeline" id="matchTimeline">
+      <div style="text-align:center;color:var(--muted);padding:40px;">Chargement des matchs…</div>
+    </div>
   </section>
-
-
 
 </main>
 
 <footer>
-  <p>FIFA World Cup 2026 — Dashboard Statistique ⚽ Données simulées à des fins de visualisation — <span>Powered by Chart.js</span></p>
+  <p>FIFA World Cup 2026 — Dashboard non-officiel</p>
+  <p style="margin-top:8px;">Données matchs : <span>FIFA API</span> · Cotes : <span>Betclic</span> · <span>Winamax</span> · <span>Unibet</span></p>
+  <p style="margin-top:8px;opacity:.4;font-size:.7rem;">Les cotes sont indicatives. Jeu responsable — 18+</p>
 </footer>
 
 <script>
-const API_ENDPOINT = document.querySelector('meta[name="api-endpoint"]')?.content || 'https://cdm2026.onrender.com/api/live.json';
-const DEFAULT_LIVE_DATA = {
-  live: false,
-  last_updated: new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
-  stats: {
-    matches_played: 0,
-    goals: 0,
-    teams: 48,
-    host_cities: 16,
-  },
-  groups: [],
-  matches: [],
-  scorers: { goals: [], assists: [], shots: [] },
-};
+// ──────────────────────────────────────────────
+// CONFIG
+// ──────────────────────────────────────────────
+const API_URL = (() => {
+  const meta = document.querySelector('meta[name="api-endpoint"]');
+  return meta ? meta.content : '/api/live.json';
+})();
 
-const GROUP_PLACEHOLDERS = Array.from({ length: 16 }, (_, index) => ({
-  name: `Groupe ${String.fromCharCode(65 + index)}`,
-  teams: Array.from({ length: 4 }, (__, teamIndex) => ({
-    slot: `${String.fromCharCode(65 + index)}${teamIndex + 1}`,
-    name: 'TBD',
-    p: 0,
-    w: 0,
-    d: 0,
-    l: 0,
-    gf: 0,
-    ga: 0,
-    pts: 0,
-  })),
-}));
+const BOOKMAKERS = [
+  { key: 'betclic',  label: 'Betclic',  cls: 'betclic',  icon: 'B', color: '#FF6B35', url: 'https://www.betclic.fr/football-s1/coupe-du-monde-2026-c72' },
+  { key: 'winamax',  label: 'Winamax',  cls: 'winamax',  icon: 'W', color: '#E8002D', url: 'https://www.winamax.fr/paris-sportifs/sports/1/events' },
+  { key: 'unibet',   label: 'Unibet',   cls: 'unibet',   icon: 'U', color: '#007B5E', url: 'https://www.unibet.fr/paris/football/coupe-du-monde-2026' },
+];
 
-function formatCountdown(start) {
-  if (!start) return 'À venir';
-  const target = new Date(start);
-  const now = new Date();
-  const diff = target - now;
-  if (diff <= 0) return 'En cours';
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  const minutes = Math.floor((diff % 3600000) / 60000);
-  return `${days ? days + 'j ' : ''}${hours}h ${minutes}m`;
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+let allMatches = [];
+let currentFilter = 'all';
+
+// ──────────────────────────────────────────────
+// UTILITIES
+// ──────────────────────────────────────────────
+function fmt(dt) {
+  if (!dt) return '—';
+  try {
+    const d = new Date(dt);
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  } catch { return '—'; }
 }
 
-function formatDate(iso) {
-  if (!iso) return '';
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+function countUp(el, target) {
+  let start = 0;
+  const step = Math.max(1, Math.ceil(target / 60));
+  const id = setInterval(() => {
+    start = Math.min(start + step, target);
+    el.textContent = start;
+    if (start >= target) clearInterval(id);
+  }, 20);
 }
 
-function buildGroups(groups = []) {
-  const container = document.getElementById('groupsContainer');
-  container.innerHTML = '';
-  if (!groups.length) {
-    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Aucune donnée de groupe disponible</div>';
+// ──────────────────────────────────────────────
+// GROUPS
+// ──────────────────────────────────────────────
+function renderGroups(groups) {
+  const grid = document.getElementById('groupsGrid');
+  if (!groups || groups.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;">Groupes non disponibles pour l\'instant.</div>';
     return;
   }
-  groups.forEach(group => {
-    const card = document.createElement('div');
-    card.className = 'group-card';
-    card.innerHTML = `
-      <div class="group-head">${group.name}</div>
-      <div class="group-row" style="background:rgba(245,197,24,0.04)">
-        <span class="group-col-head">Équipe</span>
-        <span class="group-col-head">J</span>
-        <span class="group-col-head">G</span>
-        <span class="group-col-head">BP</span>
-        <span class="group-col-head pts">Pts</span>
+  grid.innerHTML = groups.map(g => `
+    <div class="group-card">
+      <div class="group-head">${g.name}</div>
+      <div class="group-row">
+        <div class="group-col-head">Équipe</div>
+        <div class="group-col-head">J</div>
+        <div class="group-col-head">G</div>
+        <div class="group-col-head">N</div>
+        <div class="group-col-head">Pts</div>
       </div>
-      ${group.teams.map((team, index) => `
-        <div class="group-row ${index < 2 ? 'qualified' : ''}">
-          <span>${team.slot} ${team.name}</span>
-          <span style="color:var(--muted);font-size:.8rem">${team.p ?? 0}</span>
-          <span style="color:var(--muted);font-size:.8rem">${team.w ?? 0}</span>
-          <span style="color:var(--muted);font-size:.8rem">${team.gf ?? 0}</span>
-          <span class="pts">${team.pts ?? 0}</span>
+      ${(g.teams || []).map(t => `
+        <div class="group-row">
+          <div>${t.name || t.slot}</div>
+          <div style="color:var(--muted)">0</div>
+          <div style="color:var(--muted)">0</div>
+          <div style="color:var(--muted)">0</div>
+          <div class="pts">0</div>
         </div>
       `).join('')}
-    `;
-    container.appendChild(card);
-  });
-}
-
-function renderScorerTable(scorers = []) {
-  const body = document.getElementById('scorersBody');
-  if (!scorers.length) {
-    body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Aucun buteur disponible pour le moment</td></tr>';
-    return;
-  }
-  const max = scorers[0].val || 1;
-  body.innerHTML = scorers.map((player, index) => `
-    <tr>
-      <td class="rank ${index < 3 ? 'top' : ''}">${index + 1}</td>
-      <td>
-        <div class="player-name">${player.img || '⚽'} ${player.name}</div>
-        <div class="player-country">${player.country || ''}</div>
-      </td>
-      <td>
-        <div class="goals-bar-wrap">
-          <div class="goals-bar" style="width:${(player.val / max * 160)}px"></div>
-          <span class="goals-num">${player.val}</span>
-        </div>
-      </td>
-    </tr>
+    </div>
   `).join('');
 }
 
-function buildTimeline(matches = []) {
-  const tl = document.getElementById('matchTimeline');
-  tl.innerHTML = '';
-  if (!matches.length) {
-    tl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Aucun match disponible</div>';
+// ──────────────────────────────────────────────
+// ODDS PANEL
+// ──────────────────────────────────────────────
+function renderOddsPanel(odds, home, away) {
+  if (!odds) return '';
+
+  // Determine best (highest) odd per column
+  const cols = ['home', 'draw', 'away'];
+  const colLabels = [home || '1', 'Nul', away || '2'];
+  const best = {};
+  cols.forEach(col => {
+    best[col] = Math.max(
+      ...BOOKMAKERS.map(b => (odds[b.key] && odds[b.key][col]) ? odds[b.key][col] : 0)
+    );
+  });
+
+  const rows = BOOKMAKERS.map(bk => {
+    const o = odds[bk.key];
+    if (!o) return '';
+
+    const cells = cols.map((col, i) => {
+      const val = o[col] ? o[col].toFixed(2) : '—';
+      const isBest = o[col] && o[col] >= best[col] && o[col] > 0;
+      return `
+        <a class="odd-cell" href="${bk.url}" target="_blank" rel="noopener" title="Parier sur ${bk.label}">
+          <span class="odd-label">${colLabels[i]}</span>
+          <span class="odd-val${isBest ? ' best' : ''}">${val}</span>
+        </a>`;
+    }).join('');
+
+    return `
+      <div class="odds-row">
+        <div class="bookie-logo">
+          <span class="bookie-icon ${bk.cls}">${bk.icon}</span>
+          <span class="bookie-name">${bk.label}</span>
+        </div>
+        <div class="odds-cells">${cells}</div>
+      </div>`;
+  }).join('');
+
+  const isLive = odds.source === 'live';
+  const note = isLive
+    ? 'Cotes récupérées en temps réel'
+    : 'Cotes estimées (bookmakers temporairement indisponibles)';
+
+  return `
+    <div class="odds-panel">
+      <div class="odds-panel-title">📊 Cotes 1 / N / 2</div>
+      <div class="odds-bookmakers">${rows}</div>
+      <div class="odds-source-note">${note}</div>
+    </div>`;
+}
+
+// ──────────────────────────────────────────────
+// MATCHES TIMELINE
+// ──────────────────────────────────────────────
+function renderMatches(matches) {
+  const timeline = document.getElementById('matchTimeline');
+  if (!matches || matches.length === 0) {
+    timeline.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;">Aucun match disponible.</div>';
     return;
   }
-  matches.slice().sort((a, b) => new Date(a.datetime) - new Date(b.datetime)).forEach(match => {
-    const item = document.createElement('div');
-    item.className = 'timeline-item';
-    const score = match.status === 'finished' ? match.score : 'vs';
-    const liveBadge = match.status === 'live' ? '<span class="live-pill live">EN DIRECT</span>' : '';
-    const timeLabel = match.status === 'upcoming' && match.datetime ? `<span class="countdown" data-start="${match.datetime}">${formatCountdown(match.datetime)}</span>` : '<span class="countdown">À venir</span>';
-    item.innerHTML = `
-      <div class="timeline-dot"></div>
-      <div class="match-card">
-        <span class="match-date">${match.dateLabel || formatDate(match.datetime)}</span>
-        <div class="match-teams">
-          <span>${match.home}</span>
-          <span class="match-score">${score}</span>
-          <span>${match.away}</span>
-        </div>
-        <div class="match-meta">
-          <span class="match-stage">${match.stage}${match.group ? ' • ' + match.group : ''}</span>
-          ${liveBadge || timeLabel}
-        </div>
-      </div>
-    `;
-    tl.appendChild(item);
-  });
-  updateCountdowns();
-  setInterval(updateCountdowns, 1000);
-  document.querySelectorAll('.timeline-item').forEach((el, index) => {
-    setTimeout(() => el.classList.add('visible'), index * 50);
-  });
-}
 
-function updateCountdowns() {
-  document.querySelectorAll('.countdown[data-start]').forEach(el => {
-    el.textContent = formatCountdown(el.dataset.start);
-  });
-}
+  const filtered = currentFilter === 'all'
+    ? matches
+    : matches.filter(m => m.status === currentFilter);
 
-function renderLiveSummary(data) {
-  const summary = document.getElementById('liveSummary');
-  const liveCount = data.matches.filter(match => match.status === 'live').length;
-  const upcomingCount = data.matches.filter(match => match.status === 'upcoming').length;
-  const finishedCount = data.matches.filter(match => match.status === 'finished').length;
-  summary.innerHTML = `${data.live ? 'En direct' : 'A jour'} • En direct: ${liveCount} • À venir: ${upcomingCount} • Terminés: ${finishedCount} • Dernière mise à jour ${data.last_updated}`;
-}
-
-function renderHeroCounters(stats) {
-  document.querySelectorAll('[data-stat]').forEach(el => {
-    const field = el.dataset.stat;
-    const value = typeof stats[field] === 'number' ? stats[field] : (field === 'teams' ? 48 : field === 'host_cities' ? 16 : 0);
-    el.dataset.target = value;
-    el.textContent = '0';
-  });
-}
-
-function getFallbackScorers(data) {
-  if (data.scorers && Array.isArray(data.scorers.goals)) return data.scorers.goals;
-  return [];
-}
-
-async function fetchLiveData() {
-  try {
-    const response = await fetch(API_ENDPOINT);
-    if (response.ok) return await response.json();
-    console.warn('API returned non-ok status', response.status);
-  } catch (error) {
-    console.warn('Impossible de récupérer l’API live:', error);
+  if (filtered.length === 0) {
+    timeline.innerHTML = `<div style="text-align:center;color:var(--muted);padding:40px;">Aucun match "${currentFilter}".</div>`;
+    return;
   }
-  return DEFAULT_LIVE_DATA;
-}
 
-function renderLiveBanner(data) {
-  const badge = document.getElementById('liveIndicator');
-  const info = document.getElementById('heroLiveInfo');
-  badge.classList.toggle('live', data.live);
-  badge.classList.toggle('offline', !data.live);
-  badge.textContent = data.live ? 'STATUT : EN DIRECT' : 'STATUT : HORS LIGNE';
-  info.textContent = `Dernière mise à jour : ${data.last_updated}`;
-}
+  timeline.innerHTML = filtered.map(m => {
+    const statusLabel = m.status === 'live' ? 'EN DIRECT'
+      : m.status === 'finished' ? 'Terminé' : 'À venir';
+    const dotAnim = m.status === 'live' ? '<span class="live-dot"></span>' : '';
 
-function animateCounters() {
-  document.querySelectorAll('[data-stat]').forEach(el => {
-    const target = parseInt(el.dataset.target, 10) || 0;
-    let current = 0;
-    const step = Math.max(1, Math.round(target / 60));
-    const interval = setInterval(() => {
-      current = Math.min(current + step, target);
-      el.textContent = current.toString();
-      if (current >= target) clearInterval(interval);
-    }, 20);
+    return `
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="match-card">
+          <div class="match-header">
+            <div class="match-date">${fmt(m.datetime)}</div>
+            <div class="match-teams">
+              <span>${m.home || '?'}</span>
+              <div class="match-score">${m.score || 'vs'}</div>
+              <span>${m.away || '?'}</span>
+            </div>
+            <div class="match-meta">
+              <span class="live-pill ${m.status}">${dotAnim}${statusLabel}</span>
+              <span class="match-stage">${m.group || m.stage || ''}</span>
+            </div>
+          </div>
+          ${renderOddsPanel(m.odds, m.home, m.away)}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Animate items in
+  requestAnimationFrame(() => {
+    timeline.querySelectorAll('.timeline-item').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 40);
+    });
   });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const liveData = await fetchLiveData();
-  buildGroups(liveData.groups.length ? liveData.groups : GROUP_PLACEHOLDERS);
-  renderScorerTable(getFallbackScorers(liveData));
-  buildTimeline(liveData.matches);
-  renderHeroCounters(liveData.stats);
-  renderLiveBanner(liveData);
-  renderLiveSummary(liveData);
-  setTimeout(animateCounters, 400);
+// ──────────────────────────────────────────────
+// FILTER TABS
+// ──────────────────────────────────────────────
+document.getElementById('filterTabs').addEventListener('click', e => {
+  const tab = e.target.closest('.filter-tab');
+  if (!tab) return;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  currentFilter = tab.dataset.filter;
+  renderMatches(allMatches);
 });
+
+// ──────────────────────────────────────────────
+// STATS UPDATE
+// ──────────────────────────────────────────────
+function updateStats(stats) {
+  document.querySelectorAll('[data-stat]').forEach(el => {
+    const key = el.dataset.stat;
+    if (stats[key] !== undefined) {
+      countUp(el, stats[key]);
+    }
+  });
+}
+
+// ──────────────────────────────────────────────
+// LIVE INDICATOR
+// ──────────────────────────────────────────────
+function updateLiveIndicator(isLive, meta) {
+  const ind = document.getElementById('liveIndicator');
+  const note = document.getElementById('oddsSourceNote');
+  if (isLive) {
+    ind.className = 'hero-badge live-pill live';
+    ind.innerHTML = '<span class="live-dot"></span> MATCH EN DIRECT';
+  } else {
+    ind.className = 'hero-badge live-pill upcoming';
+    ind.textContent = 'STATUT : EN LIGNE ✓';
+  }
+  if (meta && note) {
+    const sources = [];
+    if (meta.betclic_live) sources.push('Betclic');
+    if (meta.winamax_live) sources.push('Winamax');
+    if (meta.unibet_live)  sources.push('Unibet');
+    note.textContent = sources.length > 0
+      ? `Cotes temps réel : ${sources.join(', ')}`
+      : 'Cotes estimées (bookmakers hors ligne)';
+  }
+}
+
+// ──────────────────────────────────────────────
+// MAIN FETCH
+// ──────────────────────────────────────────────
+async function loadData() {
+  try {
+    const resp = await fetch(API_URL);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    allMatches = data.matches || [];
+    updateStats(data.stats || {});
+    updateLiveIndicator(data.live, data.odds_meta);
+    renderGroups(data.groups || []);
+    renderMatches(allMatches);
+  } catch (err) {
+    console.error('Erreur chargement données:', err);
+    document.getElementById('liveIndicator').textContent = 'HORS LIGNE';
+    document.getElementById('matchTimeline').innerHTML =
+      `<div style="text-align:center;color:var(--red);padding:40px;">
+        Impossible de joindre le serveur.<br>
+        <small style="color:var(--muted)">Vérifiez que le backend est démarré sur ${API_URL}</small>
+      </div>`;
+  }
+}
+
+// Init
+loadData();
+// Refresh toutes les 60 secondes
+setInterval(loadData, 60_000);
 </script>
 </body>
 </html>
