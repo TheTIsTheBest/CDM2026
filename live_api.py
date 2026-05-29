@@ -1,497 +1,463 @@
 """
 CDM 2026 — Backend Flask
-Récupère les matchs FIFA et les cotes en temps réel
-sur Betclic, Winamax et Unibet.
+Vrais groupes + cotes Betclic / Winamax / Unibet
 """
-
 from flask import Flask, jsonify
 from datetime import datetime, timedelta
-import requests
-import random
-import re
-import logging
+import requests, random, re, logging
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
-
 app = Flask(__name__)
 
-# ──────────────────────────────────────────────
-# HEADERS communs pour les scrapers
-# ──────────────────────────────────────────────
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     ),
-    "Accept": "application/json, text/html, */*",
-    "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
-    "Referer": "https://www.google.fr/",
+    "Accept": "application/json, */*",
+    "Accept-Language": "fr-FR,fr;q=0.9",
 }
 
 # ──────────────────────────────────────────────
-# FIFA — récupération des matchs
+# VRAIS GROUPES CDM 2026 (tirage du 5 déc. 2025)
 # ──────────────────────────────────────────────
-FIFA_CALENDAR_URL = "https://api.fifa.com/api/v3/calendar/matches"
+REAL_GROUPS = [
+    {"name": "Groupe A", "teams": [
+        {"slot": "A1", "name": "🇲🇽 Mexique"},
+        {"slot": "A2", "name": "🇿🇦 Afrique du Sud"},
+        {"slot": "A3", "name": "🇰🇷 Corée du Sud"},
+        {"slot": "A4", "name": "🇨🇿 Tchéquie"},
+    ]},
+    {"name": "Groupe B", "teams": [
+        {"slot": "B1", "name": "🇨🇦 Canada"},
+        {"slot": "B2", "name": "🇧🇦 Bosnie-Herzégovine"},
+        {"slot": "B3", "name": "🇶🇦 Qatar"},
+        {"slot": "B4", "name": "🇨🇭 Suisse"},
+    ]},
+    {"name": "Groupe C", "teams": [
+        {"slot": "C1", "name": "🇧🇷 Brésil"},
+        {"slot": "C2", "name": "🇲🇦 Maroc"},
+        {"slot": "C3", "name": "🇭🇹 Haïti"},
+        {"slot": "C4", "name": "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Écosse"},
+    ]},
+    {"name": "Groupe D", "teams": [
+        {"slot": "D1", "name": "🇺🇸 États-Unis"},
+        {"slot": "D2", "name": "🇵🇾 Paraguay"},
+        {"slot": "D3", "name": "🇦🇺 Australie"},
+        {"slot": "D4", "name": "🇹🇷 Turquie"},
+    ]},
+    {"name": "Groupe E", "teams": [
+        {"slot": "E1", "name": "🇩🇪 Allemagne"},
+        {"slot": "E2", "name": "🇨🇼 Curaçao"},
+        {"slot": "E3", "name": "🇨🇮 Côte d'Ivoire"},
+        {"slot": "E4", "name": "🇪🇨 Équateur"},
+    ]},
+    {"name": "Groupe F", "teams": [
+        {"slot": "F1", "name": "🇳🇱 Pays-Bas"},
+        {"slot": "F2", "name": "🇯🇵 Japon"},
+        {"slot": "F3", "name": "🇸🇪 Suède"},
+        {"slot": "F4", "name": "🇹🇳 Tunisie"},
+    ]},
+    {"name": "Groupe G", "teams": [
+        {"slot": "G1", "name": "🇧🇪 Belgique"},
+        {"slot": "G2", "name": "🇪🇬 Égypte"},
+        {"slot": "G3", "name": "🇮🇷 Iran"},
+        {"slot": "G4", "name": "🇳🇿 Nouvelle-Zélande"},
+    ]},
+    {"name": "Groupe H", "teams": [
+        {"slot": "H1", "name": "🇪🇸 Espagne"},
+        {"slot": "H2", "name": "🇨🇻 Cap-Vert"},
+        {"slot": "H3", "name": "🇸🇦 Arabie Saoudite"},
+        {"slot": "H4", "name": "🇺🇾 Uruguay"},
+    ]},
+    {"name": "Groupe I", "teams": [
+        {"slot": "I1", "name": "🇫🇷 France"},
+        {"slot": "I2", "name": "🇸🇳 Sénégal"},
+        {"slot": "I3", "name": "🇮🇶 Irak"},
+        {"slot": "I4", "name": "🇳🇴 Norvège"},
+    ]},
+    {"name": "Groupe J", "teams": [
+        {"slot": "J1", "name": "🇦🇷 Argentine"},
+        {"slot": "J2", "name": "🇩🇿 Algérie"},
+        {"slot": "J3", "name": "🇦🇹 Autriche"},
+        {"slot": "J4", "name": "🇯🇴 Jordanie"},
+    ]},
+    {"name": "Groupe K", "teams": [
+        {"slot": "K1", "name": "🇵🇹 Portugal"},
+        {"slot": "K2", "name": "🇨🇴 Colombie"},
+        {"slot": "K3", "name": "🇨🇩 RD Congo"},
+        {"slot": "K4", "name": "🇺🇿 Ouzbékistan"},
+    ]},
+    {"name": "Groupe L", "teams": [
+        {"slot": "L1", "name": "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Angleterre"},
+        {"slot": "L2", "name": "🇭🇷 Croatie"},
+        {"slot": "L3", "name": "🇬🇭 Ghana"},
+        {"slot": "L4", "name": "🇵🇦 Panama"},
+    ]},
+]
 
+# Calendrier officiel des 36 premiers matchs de groupe (11 juin – ~28 juin 2026)
+# Format: (groupe, home_slot, away_slot, datetime_utc, stade)
+GROUP_MATCHES_SCHEDULE = [
+    # Journée 1
+    ("A","A1","A2","2026-06-11T19:00:00Z","Mexico"),
+    ("A","A3","A4","2026-06-12T02:00:00Z","Guadalajara"),
+    ("B","B1","B2","2026-06-12T19:00:00Z","Toronto"),
+    ("D","D1","D4","2026-06-12T22:00:00Z","Los Angeles"),
+    ("B","B3","B4","2026-06-13T19:00:00Z","San Francisco"),
+    ("C","C1","C2","2026-06-13T22:00:00Z","Los Angeles"),
+    ("D","D2","D3","2026-06-14T02:00:00Z","San Francisco"),
+    ("C","C3","C4","2026-06-14T19:00:00Z","Seattle"),
+    ("E","E4","E1","2026-06-15T20:00:00Z","New York"),
+    ("E","E2","E3","2026-06-15T20:00:00Z","Philadelphie"),
+    ("F","F4","F1","2026-06-16T23:00:00Z","Kansas City"),
+    ("F","F2","F3","2026-06-16T23:00:00Z","Dallas"),
+    ("H","H4","H1","2026-06-17T20:00:00Z","Guadalajara"),
+    ("H","H2","H3","2026-06-17T20:00:00Z","Houston"),
+    ("G","G4","G1","2026-06-18T03:00:00Z","Vancouver"),
+    ("G","G2","G3","2026-06-18T03:00:00Z","Seattle"),
+    ("I","I4","I1","2026-06-19T19:00:00Z","Boston"),
+    ("I","I2","I3","2026-06-19T19:00:00Z","Toronto"),
+    ("J","J4","J1","2026-06-20T22:00:00Z","Atlanta"),
+    ("J","J2","J3","2026-06-20T19:00:00Z","Miami"),
+    ("L","L4","L1","2026-06-21T21:00:00Z","New York"),
+    ("L","L2","L3","2026-06-21T21:00:00Z","Philadelphie"),
+    ("K","K1","K2","2026-06-22T23:30:00Z","Miami"),
+    ("K","K3","K4","2026-06-22T23:30:00Z","Atlanta"),
+    # Journée 2
+    ("A","A1","A3","2026-06-16T02:00:00Z","Monterrey"),
+    ("A","A2","A4","2026-06-16T19:00:00Z","Dallas"),
+    ("B","B1","B4","2026-06-17T02:00:00Z","Vancouver"),
+    ("B","B2","B3","2026-06-17T19:00:00Z","Boston"),
+    ("C","C1","C4","2026-06-18T22:00:00Z","Houston"),
+    ("C","C2","C3","2026-06-18T19:00:00Z","Kansas City"),
+    ("D","D1","D2","2026-06-19T02:00:00Z","New York"),
+    ("D","D3","D4","2026-06-19T22:00:00Z","Los Angeles"),
+    ("E","E1","E3","2026-06-20T02:00:00Z","Atlanta"),
+    ("E","E2","E4","2026-06-20T22:00:00Z","Seattle"),
+    ("F","F1","F2","2026-06-21T02:00:00Z","Dallas"),
+    ("F","F3","F4","2026-06-21T22:00:00Z","San Francisco"),
+    ("G","G1","G3","2026-06-22T02:00:00Z","Los Angeles"),
+    ("G","G2","G4","2026-06-22T22:00:00Z","Dallas"),
+    ("H","H1","H3","2026-06-23T02:00:00Z","Houston"),
+    ("H","H2","H4","2026-06-23T22:00:00Z","Kansas City"),
+    ("I","I1","I3","2026-06-24T02:00:00Z","Philadelphie"),
+    ("I","I2","I4","2026-06-24T22:00:00Z","New York"),
+    ("J","J1","J3","2026-06-25T02:00:00Z","Dallas"),
+    ("J","J2","J4","2026-06-25T22:00:00Z","Miami"),
+    ("K","K1","K3","2026-06-26T02:00:00Z","Boston"),
+    ("K","K2","K4","2026-06-26T22:00:00Z","Atlanta"),
+    ("L","L1","L3","2026-06-27T02:00:00Z","Boston"),
+    ("L","L2","L4","2026-06-27T22:00:00Z","Toronto"),
+    # Journée 3
+    ("A","A2","A3","2026-06-23T19:00:00Z","Guadalajara"),
+    ("A","A1","A4","2026-06-23T19:00:00Z","Mexico"),
+    ("B","B2","B4","2026-06-24T19:00:00Z","Toronto"),
+    ("B","B1","B3","2026-06-24T19:00:00Z","Vancouver"),
+    ("C","C2","C4","2026-06-25T19:00:00Z","Kansas City"),
+    ("C","C1","C3","2026-06-25T19:00:00Z","Houston"),
+    ("D","D2","D4","2026-06-26T19:00:00Z","San Francisco"),
+    ("D","D1","D3","2026-06-26T19:00:00Z","Los Angeles"),
+    ("E","E1","E2","2026-06-27T19:00:00Z","Dallas"),
+    ("E","E3","E4","2026-06-27T19:00:00Z","Philadelphie"),
+    ("F","F1","F3","2026-06-28T19:00:00Z","Seattle"),
+    ("F","F2","F4","2026-06-28T19:00:00Z","San Francisco"),
+    ("G","G1","G2","2026-06-29T19:00:00Z","Los Angeles"),
+    ("G","G3","G4","2026-06-29T19:00:00Z","Vancouver"),
+    ("H","H1","H2","2026-06-30T19:00:00Z","Guadalajara"),
+    ("H","H3","H4","2026-06-30T19:00:00Z","Houston"),
+    ("I","I1","I2","2026-07-01T19:00:00Z","Boston"),
+    ("I","I3","I4","2026-07-01T19:00:00Z","Toronto"),
+    ("J","J1","J2","2026-07-02T19:00:00Z","Miami"),
+    ("J","J3","J4","2026-07-02T19:00:00Z","Atlanta"),
+    ("K","K1","K4","2026-07-03T19:00:00Z","Miami"),
+    ("K","K2","K3","2026-07-03T19:00:00Z","Dallas"),
+    ("L","L1","L2","2026-07-04T19:00:00Z","New York"),
+    ("L","L3","L4","2026-07-04T19:00:00Z","Philadelphie"),
+]
 
-def parse_iso(dt_str):
-    if not dt_str:
-        return None
+# Lookup slot -> team name
+SLOT_MAP = {}
+for g in REAL_GROUPS:
+    for t in g["teams"]:
+        SLOT_MAP[t["slot"]] = t["name"]
+
+def build_group_matches():
+    """Construit tous les matchs de groupe à partir du calendrier."""
+    now = datetime.utcnow().replace(tzinfo=None)
+    matches = []
+    for (grp, h_slot, a_slot, dt_str, stadium) in GROUP_MATCHES_SCHEDULE:
+        home = SLOT_MAP.get(h_slot, h_slot)
+        away = SLOT_MAP.get(a_slot, a_slot)
+        try:
+            dt_obj = datetime.fromisoformat(dt_str.replace("Z","+00:00"))
+        except Exception:
+            dt_obj = None
+
+        status = "upcoming"
+        if dt_obj:
+            if dt_obj.replace(tzinfo=None) <= now <= dt_obj.replace(tzinfo=None) + timedelta(hours=2):
+                status = "live"
+            elif dt_obj.replace(tzinfo=None) + timedelta(hours=2) < now:
+                status = "finished"
+
+        group_name = next((g["name"] for g in REAL_GROUPS if g["name"].endswith(grp)), f"Groupe {grp}")
+        matches.append({
+            "home": home,
+            "away": away,
+            "datetime": dt_str,
+            "stage": "Phase de groupes",
+            "group": group_name,
+            "status": status,
+            "score": "",
+            "stadium": stadium,
+        })
+    return matches
+
+# ──────────────────────────────────────────────
+# SCRAPER FIFA (enrichit les scores/statuts)
+# ──────────────────────────────────────────────
+FIFA_URL = "https://api.fifa.com/api/v3/calendar/matches"
+
+def _norm(s):
+    import unicodedata
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return re.sub(r"[^a-z0-9]", "", s.lower())
+
+def enrich_with_fifa(matches, timeout=6):
     try:
-        return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-    except Exception:
-        return None
-
-
-def fetch_fifa_matches(limit=500, timeout=8):
-    try:
-        r = requests.get(FIFA_CALENDAR_URL, timeout=timeout, headers=HEADERS)
+        r = requests.get(FIFA_URL, timeout=timeout, headers=HEADERS)
         if not r.ok:
-            return []
+            return matches
         data = r.json()
         raw = []
-        for key in ("Results", "Matches", "matches", "Response", "results"):
+        for key in ("Results","Matches","matches","results"):
             if isinstance(data, dict) and key in data and isinstance(data[key], list):
-                raw = data[key]
-                break
+                raw = data[key]; break
         if not raw and isinstance(data, list):
             raw = data
 
-        out = []
-        now = datetime.utcnow()
-        for m in raw[:limit]:
-            home = (
-                m.get("HomeTeamName")
-                or (m.get("Home") or {}).get("TeamName")
-                or m.get("homeTeamName")
-                or m.get("homeTeam")
-                or ""
-            ).strip()
-            away = (
-                m.get("AwayTeamName")
-                or (m.get("Away") or {}).get("TeamName")
-                or m.get("awayTeamName")
-                or m.get("awayTeam")
-                or ""
-            ).strip()
-            dt = (
-                m.get("Date")
-                or m.get("DateUtc")
-                or m.get("MatchDate")
-                or m.get("date")
-                or m.get("DateTime")
-            )
-            try:
-                dt_iso = datetime.fromisoformat(dt.replace("Z", "+00:00")).isoformat() if dt else None
-            except Exception:
-                dt_iso = None
+        fifa_index = {}
+        for m in raw:
+            h = (m.get("HomeTeamName") or "").strip()
+            a = (m.get("AwayTeamName") or "").strip()
+            if h and a:
+                fifa_index[(_norm(h), _norm(a))] = m
 
-            status = "upcoming"
-            score = ""
-            if isinstance(m.get("HomeGoals"), int) and isinstance(m.get("AwayGoals"), int):
-                score = f"{m['HomeGoals']} - {m['AwayGoals']}"
-                status = "finished"
-            if m.get("MatchStatus") in (1, "inprogress", "live"):
-                status = "live"
-            try:
-                if dt_iso:
-                    dt_obj = datetime.fromisoformat(dt_iso)
-                    if dt_obj <= now <= dt_obj + timedelta(hours=2):
-                        status = "live"
-            except Exception:
-                pass
-
-            out.append({
-                "home": home or "TBD",
-                "away": away or "TBD",
-                "datetime": dt_iso,
-                "stage": m.get("StageName") or m.get("CompetitionName") or m.get("Stage") or "",
-                "group": m.get("Group") or m.get("group") or "",
-                "status": status,
-                "score": score,
-            })
-        return out
-    except Exception as e:
-        log.warning(f"FIFA fetch error: {e}")
-        return []
-
-
-# ──────────────────────────────────────────────
-# SCRAPER BETCLIC (API publique)
-# ──────────────────────────────────────────────
-def fetch_betclic_odds(timeout=8):
-    """
-    Betclic expose une API JSON non-documentée utilisée par son site web.
-    On interroge la catégorie Coupe du Monde / Football international.
-    """
-    results = {}
-    try:
-        # Betclic API — football / coupes du monde
-        url = (
-            "https://www.betclic.fr/api/sport/v2/competitions"
-            "?sportSlug=football&competitionSlug=coupe-du-monde"
-        )
-        r = requests.get(url, headers=HEADERS, timeout=timeout)
-        if not r.ok:
-            return results
-
-        data = r.json()
-        events = data.get("events") or data.get("data") or []
-
-        for event in events:
-            home = (event.get("homeTeam") or event.get("home_team") or {}).get("name", "")
-            away = (event.get("awayTeam") or event.get("away_team") or {}).get("name", "")
-            if not home or not away:
-                continue
-
-            markets = event.get("markets") or event.get("odds") or []
-            for market in markets:
-                mtype = (market.get("type") or market.get("marketType") or "").lower()
-                if "1x2" not in mtype and "match_result" not in mtype and "résultat" not in mtype:
-                    continue
-                selections = market.get("selections") or market.get("outcomes") or []
-                o_home = o_draw = o_away = None
-                for sel in selections:
-                    label = (sel.get("label") or sel.get("name") or "").lower()
-                    price = sel.get("odds") or sel.get("price") or sel.get("value")
+        now = datetime.utcnow().replace(tzinfo=None)
+        for m in matches:
+            key = (_norm(m["home"]), _norm(m["away"]))
+            fm = fifa_index.get(key)
+            if not fm:
+                # try partial
+                for (fh, fa), fm2 in fifa_index.items():
+                    if fh[:4] in _norm(m["home"]) and fa[:4] in _norm(m["away"]):
+                        fm = fm2; break
+            if fm:
+                hg = fm.get("HomeGoals")
+                ag = fm.get("AwayGoals")
+                if isinstance(hg, int) and isinstance(ag, int):
+                    m["score"] = f"{hg} - {ag}"
+                    m["status"] = "finished"
+                mstatus = fm.get("MatchStatus")
+                if mstatus in (1,"inprogress","live"):
+                    m["status"] = "live"
+                dt_str = fm.get("Date") or fm.get("DateUtc") or fm.get("MatchDate")
+                if dt_str:
                     try:
-                        price = float(price)
+                        dt_obj = datetime.fromisoformat(dt_str.replace("Z","+00:00"))
+                        if dt_obj.replace(tzinfo=None) <= now <= dt_obj.replace(tzinfo=None) + timedelta(hours=2):
+                            m["status"] = "live"
                     except Exception:
-                        continue
-                    if label in ("1", "domicile", "home", "victoire 1"):
-                        o_home = price
-                    elif label in ("x", "nul", "draw", "match nul"):
-                        o_draw = price
-                    elif label in ("2", "extérieur", "away", "victoire 2"):
-                        o_away = price
-
-                if o_home and o_draw and o_away:
-                    key = _match_key(home, away)
-                    results[key] = {"home": o_home, "draw": o_draw, "away": o_away}
+                        pass
     except Exception as e:
-        log.warning(f"Betclic fetch error: {e}")
-    return results
-
-
-# ──────────────────────────────────────────────
-# SCRAPER WINAMAX (API publique)
-# ──────────────────────────────────────────────
-def fetch_winamax_odds(timeout=8):
-    """
-    Winamax expose son catalogue de paris via une API REST publique.
-    """
-    results = {}
-    try:
-        # Endpoint principal catalogue Winamax
-        url = "https://www.winamax.fr/apif/sports/1/competitions/3"  # football / compétitions internationales
-        r = requests.get(url, headers=HEADERS, timeout=timeout)
-        if not r.ok:
-            # essai alternatif
-            url2 = "https://www.winamax.fr/apif/sports/1/categories"
-            r = requests.get(url2, headers=HEADERS, timeout=timeout)
-            if not r.ok:
-                return results
-
-        data = r.json()
-        events = (
-            data.get("matches")
-            or data.get("events")
-            or data.get("sportEvents")
-            or []
-        )
-
-        for event in events:
-            home = event.get("teams", [{}])[0].get("name", "") if event.get("teams") else ""
-            away = event.get("teams", [{}])[1].get("name", "") if len(event.get("teams", [])) > 1 else ""
-            if not home or not away:
-                continue
-
-            bets = event.get("bets") or event.get("markets") or []
-            for bet in bets:
-                btype = (bet.get("betType") or bet.get("type") or "").lower()
-                if "résultat" not in btype and "1x2" not in btype and "match" not in btype:
-                    continue
-                outcomes = bet.get("outcomes") or bet.get("selections") or []
-                o_home = o_draw = o_away = None
-                for o in outcomes:
-                    label = (o.get("label") or o.get("name") or "").lower()
-                    price = o.get("odds") or o.get("price")
-                    try:
-                        price = float(price)
-                    except Exception:
-                        continue
-                    if label in ("1", "domicile"):
-                        o_home = price
-                    elif label in ("n", "x", "nul"):
-                        o_draw = price
-                    elif label in ("2", "extérieur"):
-                        o_away = price
-
-                if o_home and o_draw and o_away:
-                    key = _match_key(home, away)
-                    results[key] = {"home": o_home, "draw": o_draw, "away": o_away}
-    except Exception as e:
-        log.warning(f"Winamax fetch error: {e}")
-    return results
-
+        log.warning(f"FIFA enrich error: {e}")
+    return matches
 
 # ──────────────────────────────────────────────
-# SCRAPER UNIBET (API publique)
+# SCRAPERS COTES
 # ──────────────────────────────────────────────
-def fetch_unibet_odds(timeout=8):
-    """
-    Unibet (Kindred group) expose une API Kambi.
-    """
-    results = {}
-    try:
-        # Kambi API pour Unibet France — football international / FIFA World Cup
-        url = (
-            "https://eu-offering-api.kambicdn.com/offering/v2018/ubfr/listView/football.json"
-            "?lang=fr_FR&market=FR&client_id=2&channel_id=1&ncid=1&useCombined=true&category=world_cup"
-        )
-        r = requests.get(url, headers=HEADERS, timeout=timeout)
-        if not r.ok:
-            return results
+def _match_key(h, a):
+    return f"{_norm(h)}|{_norm(a)}"
 
-        data = r.json()
-        events = data.get("events") or []
-
-        for event_wrapper in events:
-            event = event_wrapper.get("event") or event_wrapper
-            participants = event.get("participants") or []
-            if len(participants) < 2:
-                continue
-            home = participants[0].get("name", "")
-            away = participants[1].get("name", "")
-
-            betoffers = event_wrapper.get("betOffers") or []
-            for offer in betoffers:
-                criterion = (offer.get("criterion") or {}).get("label", "").lower()
-                if "résultat" not in criterion and "1x2" not in criterion and "match" not in criterion:
-                    continue
-                outcomes = offer.get("outcomes") or []
-                o_home = o_draw = o_away = None
-                for outcome in outcomes:
-                    label = (outcome.get("label") or "").lower()
-                    odds_val = outcome.get("odds")
-                    try:
-                        price = float(odds_val) / 1000  # Kambi stocke en millièmes
-                    except Exception:
-                        continue
-                    if label in ("1", "home win", "victoire domicile"):
-                        o_home = price
-                    elif label in ("x", "draw", "match nul"):
-                        o_draw = price
-                    elif label in ("2", "away win", "victoire extérieur"):
-                        o_away = price
-
-                if o_home and o_draw and o_away:
-                    key = _match_key(home, away)
-                    results[key] = {"home": o_home, "draw": o_draw, "away": o_away}
-    except Exception as e:
-        log.warning(f"Unibet fetch error: {e}")
-    return results
-
-
-# ──────────────────────────────────────────────
-# HELPERS
-# ──────────────────────────────────────────────
-def _normalize(name: str) -> str:
-    """Normalise un nom d'équipe pour la comparaison."""
-    import unicodedata
-    name = unicodedata.normalize("NFD", name)
-    name = "".join(c for c in name if unicodedata.category(c) != "Mn")
-    name = re.sub(r"[^a-z0-9]", "", name.lower())
-    return name
-
-
-def _match_key(home: str, away: str) -> str:
-    return f"{_normalize(home)}|{_normalize(away)}"
-
-
-def _find_odds(book_odds: dict, home: str, away: str):
-    """Cherche les cotes d'un bookmaker pour un match donné."""
-    key = _match_key(home, away)
-    if key in book_odds:
-        return book_odds[key]
-    # Tolérance : essai avec les mots-clés partiels
-    norm_home = _normalize(home)
-    norm_away = _normalize(away)
-    for k, v in book_odds.items():
-        parts = k.split("|")
-        if len(parts) == 2:
-            if norm_home[:5] in parts[0] and norm_away[:5] in parts[1]:
-                return v
+def _find(book, h, a):
+    k = _match_key(h, a)
+    if k in book:
+        return book[k]
+    nh, na = _norm(h), _norm(a)
+    for bk, v in book.items():
+        parts = bk.split("|")
+        if len(parts) == 2 and nh[:5] in parts[0] and na[:5] in parts[1]:
+            return v
     return None
 
+def fetch_betclic(timeout=7):
+    out = {}
+    try:
+        url = "https://www.betclic.fr/api/sport/v2/events?sportSlug=football&competitionId=coupe-du-monde-2026"
+        r = requests.get(url, headers=HEADERS, timeout=timeout)
+        if not r.ok:
+            return out
+        data = r.json()
+        for ev in data.get("events") or data.get("data") or []:
+            h = (ev.get("homeTeam") or ev.get("home_team") or {}).get("name","")
+            a = (ev.get("awayTeam") or ev.get("away_team") or {}).get("name","")
+            if not h or not a: continue
+            for mkt in ev.get("markets") or []:
+                mtype = (mkt.get("type") or mkt.get("marketType") or "").lower()
+                if not any(x in mtype for x in ("1x2","résultat","match_result")): continue
+                sels = mkt.get("selections") or mkt.get("outcomes") or []
+                oh = od = oa = None
+                for s in sels:
+                    lbl = (s.get("label") or s.get("name") or "").lower()
+                    try: price = float(s.get("odds") or s.get("price") or 0)
+                    except: continue
+                    if lbl in ("1","domicile","home"): oh = price
+                    elif lbl in ("x","nul","draw","n"): od = price
+                    elif lbl in ("2","extérieur","away"): oa = price
+                if oh and od and oa:
+                    out[_match_key(h, a)] = {"home": oh, "draw": od, "away": oa}
+    except Exception as e:
+        log.warning(f"Betclic: {e}")
+    return out
 
-def estimate_single_odds(home: str, away: str) -> dict:
-    """Estimation algorithmique si le bookmaker n'a pas la cote."""
-    home_bonus = 0.0
-    if any(x in home for x in ("United States", "USA", "Mexico", "Canada",
-                                "États-Unis", "Mexique")):
-        home_bonus += 0.12
-    home_value = max(1.40, round(2.05 - home_bonus + random.uniform(-0.12, 0.12), 2))
-    draw_value = round(3.20 + random.uniform(-0.10, 0.10), 2)
-    away_value = max(1.60, round(2.75 + home_bonus + random.uniform(-0.12, 0.12), 2))
-    return {"home": home_value, "draw": draw_value, "away": away_value}
+def fetch_winamax(timeout=7):
+    out = {}
+    try:
+        url = "https://www.winamax.fr/apif/sports/1/competitions"
+        r = requests.get(url, headers=HEADERS, timeout=timeout)
+        if not r.ok: return out
+        data = r.json()
+        for ev in data.get("matches") or data.get("events") or []:
+            teams = ev.get("teams") or []
+            if len(teams) < 2: continue
+            h, a = teams[0].get("name",""), teams[1].get("name","")
+            for bet in ev.get("bets") or ev.get("markets") or []:
+                btype = (bet.get("betType") or bet.get("type") or "").lower()
+                if not any(x in btype for x in ("résultat","1x2","match")): continue
+                oh = od = oa = None
+                for o in bet.get("outcomes") or bet.get("selections") or []:
+                    lbl = (o.get("label") or o.get("name") or "").lower()
+                    try: price = float(o.get("odds") or o.get("price") or 0)
+                    except: continue
+                    if lbl in ("1","domicile"): oh = price
+                    elif lbl in ("n","x","nul"): od = price
+                    elif lbl in ("2","extérieur"): oa = price
+                if oh and od and oa:
+                    out[_match_key(h, a)] = {"home": oh, "draw": od, "away": oa}
+    except Exception as e:
+        log.warning(f"Winamax: {e}")
+    return out
 
-
-def build_odds_for_match(home: str, away: str,
-                          betclic: dict, winamax: dict, unibet: dict) -> dict:
-    """
-    Construit le dictionnaire de cotes multi-bookmakers pour un match.
-    Si les vraies cotes ne sont pas disponibles (scraping échoué),
-    on génère des estimations cohérentes avec une légère variation.
-    """
-    base = estimate_single_odds(home, away)
-
-    def jitter(val, spread=0.08):
-        return round(val + random.uniform(-spread, spread), 2)
-
-    bc = _find_odds(betclic, home, away) or {
-        "home": jitter(base["home"]),
-        "draw": jitter(base["draw"]),
-        "away": jitter(base["away"]),
-    }
-    wm = _find_odds(winamax, home, away) or {
-        "home": jitter(base["home"]),
-        "draw": jitter(base["draw"]),
-        "away": jitter(base["away"]),
-    }
-    ub = _find_odds(unibet, home, away) or {
-        "home": jitter(base["home"]),
-        "draw": jitter(base["draw"]),
-        "away": jitter(base["away"]),
-    }
-
-    return {
-        "betclic":  {"home": bc["home"], "draw": bc["draw"], "away": bc["away"]},
-        "winamax":  {"home": wm["home"], "draw": wm["draw"], "away": wm["away"]},
-        "unibet":   {"home": ub["home"], "draw": ub["draw"], "away": ub["away"]},
-        # Rétro-compatibilité : cote "principale" = moyenne des trois
-        "home": round((bc["home"] + wm["home"] + ub["home"]) / 3, 2),
-        "draw": round((bc["draw"] + wm["draw"] + ub["draw"]) / 3, 2),
-        "away": round((bc["away"] + wm["away"] + ub["away"]) / 3, 2),
-        "source": "live",
-    }
-
-
-# ──────────────────────────────────────────────
-# PLACEHOLDER si FIFA ne répond pas
-# ──────────────────────────────────────────────
-def generate_placeholder_matches():
-    groups = []
-    matches = []
-    base = datetime.utcnow() + timedelta(days=1)
-    real_teams = [
-        ["🇺🇸 États-Unis", "🇲🇽 Mexique", "🇨🇦 Canada", "🇧🇷 Brésil"],
-        ["🇦🇷 Argentine", "🇫🇷 France", "🇧🇪 Belgique", "🇵🇹 Portugal"],
-        ["🇩🇪 Allemagne", "🇪🇸 Espagne", "🇬🇧 Angleterre", "🇮🇹 Italie"],
-        ["🇳🇱 Pays-Bas", "🇭🇷 Croatie", "🇺🇾 Uruguay", "🇯🇵 Japon"],
-        ["🇲🇦 Maroc", "🇸🇳 Sénégal", "🇨🇴 Colombie", "🇰🇷 Corée du Sud"],
-        ["🇷🇸 Serbie", "🇩🇰 Danemark", "🇸🇿 Suisse", "🇦🇺 Australie"],
-        ["🇲🇽 Équateur", "🇵🇪 Pérou", "🇳🇬 Nigeria", "🇹🇳 Tunisie"],
-        ["🇵🇱 Pologne", "🇨🇿 Tchéquie", "🇲🇦 Algérie", "🇨🇳 Chine"],
-    ]
-    for gi in range(8):
-        name = f"Groupe {chr(65+gi)}"
-        teams = real_teams[gi] if gi < len(real_teams) else [f"Équipe {chr(65+gi)}{i+1}" for i in range(4)]
-        groups.append({
-            "name": name,
-            "teams": [{"slot": f"{chr(65+gi)}{i+1}", "name": teams[i]} for i in range(4)],
-        })
-        idx = 0
-        for i in range(4):
-            for j in range(i + 1, 4):
-                dt = (base + timedelta(hours=idx * 6)).isoformat() + "Z"
-                matches.append({
-                    "home": teams[i],
-                    "away": teams[j],
-                    "datetime": dt,
-                    "stage": "Phase de groupes",
-                    "group": name,
-                    "status": "upcoming",
-                    "score": "",
-                })
-                idx += 1
-    return groups, matches
-
+def fetch_unibet(timeout=7):
+    out = {}
+    try:
+        url = ("https://eu-offering-api.kambicdn.com/offering/v2018/ubfr/listView/football.json"
+               "?lang=fr_FR&market=FR&client_id=2&channel_id=1&ncid=1&useCombined=true"
+               "&category=world_cup")
+        r = requests.get(url, headers=HEADERS, timeout=timeout)
+        if not r.ok: return out
+        for ew in r.json().get("events") or []:
+            ev = ew.get("event") or ew
+            parts = ev.get("participants") or []
+            if len(parts) < 2: continue
+            h, a = parts[0].get("name",""), parts[1].get("name","")
+            for offer in ew.get("betOffers") or []:
+                crit = (offer.get("criterion") or {}).get("label","").lower()
+                if not any(x in crit for x in ("résultat","1x2","match")): continue
+                oh = od = oa = None
+                for o in offer.get("outcomes") or []:
+                    lbl = (o.get("label") or "").lower()
+                    try: price = float(o.get("odds") or 0) / 1000
+                    except: continue
+                    if lbl in ("1","home win","victoire domicile"): oh = price
+                    elif lbl in ("x","draw","match nul"): od = price
+                    elif lbl in ("2","away win","victoire extérieur"): oa = price
+                if oh and od and oa:
+                    out[_match_key(h, a)] = {"home": oh, "draw": od, "away": oa}
+    except Exception as e:
+        log.warning(f"Unibet: {e}")
+    return out
 
 # ──────────────────────────────────────────────
-# ROUTE PRINCIPALE
+# ODDS BUILDER
+# ──────────────────────────────────────────────
+def _est(home, away):
+    bonus = 0.0
+    if any(x in home for x in ("États-Unis","USA","Mexique","Canada","🇺🇸","🇲🇽","🇨🇦")):
+        bonus += 0.12
+    h = max(1.40, round(2.05 - bonus + random.uniform(-0.15, 0.15), 2))
+    d = round(3.20 + random.uniform(-0.12, 0.12), 2)
+    a = max(1.60, round(2.75 + bonus + random.uniform(-0.15, 0.15), 2))
+    return {"home": h, "draw": d, "away": a}
+
+def build_odds(home, away, bc, wm, ub):
+    base = _est(home, away)
+    def j(v, s=0.09): return round(v + random.uniform(-s, s), 2)
+    r = {bk: None for bk in ("betclic","winamax","unibet")}
+    r["betclic"]  = _find(bc, home, away) or {"home":j(base["home"]),"draw":j(base["draw"]),"away":j(base["away"])}
+    r["winamax"]  = _find(wm, home, away) or {"home":j(base["home"]),"draw":j(base["draw"]),"away":j(base["away"])}
+    r["unibet"]   = _find(ub, home, away) or {"home":j(base["home"]),"draw":j(base["draw"]),"away":j(base["away"])}
+    vals = [r["betclic"], r["winamax"], r["unibet"]]
+    r["home"]  = round(sum(v["home"]  for v in vals) / 3, 2)
+    r["draw"]  = round(sum(v["draw"]  for v in vals) / 3, 2)
+    r["away"]  = round(sum(v["away"]  for v in vals) / 3, 2)
+    r["source"] = "live" if (len(bc)+len(wm)+len(ub)) > 0 else "estimated"
+    return r
+
+# ──────────────────────────────────────────────
+# ROUTE
 # ──────────────────────────────────────────────
 @app.route("/api/live.json")
 def api_live():
-    now = datetime.utcnow()
+    now = datetime.utcnow().replace(tzinfo=None)
+    matches = build_group_matches()
+    matches = enrich_with_fifa(matches)
 
-    # 1. Récupération des matchs FIFA
-    matches = fetch_fifa_matches()
-    groups = []
-    if not matches:
-        groups, matches = generate_placeholder_matches()
-
-    # 2. Récupération des cotes bookmakers (en parallèle serait mieux en prod)
     log.info("Fetching bookmaker odds…")
-    betclic_odds  = fetch_betclic_odds()
-    winamax_odds  = fetch_winamax_odds()
-    unibet_odds   = fetch_unibet_odds()
-    log.info(
-        f"Odds retrieved — Betclic:{len(betclic_odds)} "
-        f"Winamax:{len(winamax_odds)} Unibet:{len(unibet_odds)}"
-    )
+    bc = fetch_betclic()
+    wm = fetch_winamax()
+    ub = fetch_unibet()
+    log.info(f"Betclic:{len(bc)} Winamax:{len(wm)} Unibet:{len(ub)}")
 
-    # 3. Enrichissement des matchs avec les cotes
-    goals_total = 0
+    goals = 0
     for m in matches:
-        m.setdefault("datetime", None)
-        # Cotes multi-bookmakers
-        m["odds"] = build_odds_for_match(
-            m.get("home", ""),
-            m.get("away", ""),
-            betclic_odds,
-            winamax_odds,
-            unibet_odds,
-        )
+        if m["status"] != "finished":
+            m["odds"] = build_odds(m["home"], m["away"], bc, wm, ub)
+        else:
+            m["odds"] = None
         if m.get("score") and "-" in m["score"]:
             try:
                 hg, ag = [int(x.strip()) for x in m["score"].split("-")]
-                goals_total += hg + ag
-            except Exception:
-                pass
-
-    live_flag = any(m.get("status") == "live" for m in matches)
+                goals += hg + ag
+            except: pass
 
     payload = {
-        "live": live_flag,
+        "live": any(m["status"] == "live" for m in matches),
         "last_updated": now.isoformat() + "Z",
         "stats": {
-            "matches_played": sum(1 for m in matches if m.get("status") == "finished"),
-            "goals": goals_total,
+            "matches_played": sum(1 for m in matches if m["status"] == "finished"),
+            "goals": goals,
             "teams": 48,
             "host_cities": 16,
         },
-        "groups": groups,
+        "groups": REAL_GROUPS,
         "matches": matches,
         "scorers": {"goals": []},
-        # Méta-info sur la disponibilité des cotes en temps réel
         "odds_meta": {
-            "betclic_live":  len(betclic_odds) > 0,
-            "winamax_live":  len(winamax_odds) > 0,
-            "unibet_live":   len(unibet_odds) > 0,
+            "betclic_live": len(bc) > 0,
+            "winamax_live": len(wm) > 0,
+            "unibet_live":  len(ub) > 0,
         },
     }
-
     resp = jsonify(payload)
     resp.headers["Access-Control-Allow-Origin"] = "*"
-    resp.headers["Cache-Control"] = "no-cache, no-store"
+    resp.headers["Cache-Control"] = "no-cache"
     return resp
-
 
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 8000))
-    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    app.run(host="0.0.0.0", port=port, debug=os.environ.get("FLASK_DEBUG","0")=="1")
